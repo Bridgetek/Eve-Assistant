@@ -1,0 +1,2301 @@
+{
+  "date": "2026-11-13T10:23:45.019Z",
+  "node": "v24.22.1",
+  "checks": [
+    {
+      "name": "eab catalog",
+      "status": "Passed"
+    },
+    {
+      "name": "eab image command",
+      "status": "Passed"
+    },
+    {
+      "name": "eab asset routing",
+      "status": "Passed"
+    },
+    {
+      "name": "eab workflows",
+      "status": "Passed"
+    },
+    {
+      "name": "eab engineering query",
+      "status": "Passed"
+    },
+    {
+      "name": "eab startup and tools",
+      "status": "Passed"
+    },
+    {
+      "name": "bt82x engineering query",
+      "status": "Passed"
+    },
+    {
+      "name": "bt82x sample search",
+      "status": "Passed"
+    },
+    {
+      "name": "bt82x symbol lookup",
+      "status": "Passed"
+    },
+    {
+      "name": "bt82x code validation",
+      "status": "Passed"
+    },
+    {
+      "name": "bt82x repository read",
+      "status": "Passed"
+    },
+    {
+      "name": "bt82x startup and tools",
+      "status": "Passed"
+    },
+    {
+      "name": "pre82x engineering query",
+      "status": "Passed"
+    },
+    {
+      "name": "pre82x sample search",
+      "status": "Passed"
+    },
+    {
+      "name": "pre82x symbol lookup",
+      "status": "Passed"
+    },
+    {
+      "name": "pre82x module lookup",
+      "status": "Passed"
+    },
+    {
+      "name": "pre82x repository read",
+      "status": "Passed"
+    },
+    {
+      "name": "pre82x startup and tools",
+      "status": "Passed"
+    },
+    {
+      "name": "fresh EAB setup selects Rust chip-name specification",
+      "status": "Passed"
+    },
+    {
+      "name": "explicit legacy EAB remains supported",
+      "status": "Passed"
+    },
+    {
+      "name": "existing path-only EAB config preserves auto detection",
+      "status": "Passed"
+    },
+    {
+      "name": "explicit EAB spec override is preserved",
+      "status": "Passed"
+    },
+    {
+      "name": "invalid EAB CLI flavor fails clearly",
+      "status": "Passed"
+    },
+    {
+      "name": "Rust EAB rejects executable-only distribution",
+      "status": "Passed"
+    },
+    {
+      "name": "Rust EAB accepts complete distribution layout",
+      "status": "Passed"
+    },
+    {
+      "name": "Rust EAB MCP catalog uses chip-family tokens",
+      "status": "Passed"
+    },
+    {
+      "name": "bt82x rejects ../outside.txt",
+      "status": "Passed"
+    },
+    {
+      "name": "bt82x rejects outside.txt",
+      "status": "Passed"
+    },
+    {
+      "name": "pre82x rejects ../outside.txt",
+      "status": "Passed"
+    },
+    {
+      "name": "pre82x rejects outside.txt",
+      "status": "Passed"
+    },
+    {
+      "name": "missing repository fails without searching cwd",
+      "status": "Passed"
+    }
+  ],
+  "tools": {
+    "eab": [
+      {
+        "name": "list_eab_catalog",
+        "description": "List all commands loaded from the catalog, including their target chip and options.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {},
+          "additionalProperties": false
+        },
+        "annotations": {
+          "readOnlyHint": true,
+          "destructiveHint": false,
+          "openWorldHint": false
+        }
+      },
+      {
+        "name": "prepare_eab_tool_call",
+        "description": "Validate the tool path, load a command preview, and create a confirmation request.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "EAB_TOOL_PATH": {
+              "type": "string",
+              "description": "Absolute path to the CLI executable (e.g. eab_tools.exe)."
+            },
+            "commandName": {
+              "type": "string",
+              "description": "Command name from the catalog. Chip-prefixed names like \"82x img_cvt\" are accepted."
+            },
+            "targetChip": {
+              "type": "string",
+              "description": "Optional target chip filter, such as BT82X or Pre-BT82X."
+            },
+            "cliArgs": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Raw CLI arguments to pass after the command name."
+            },
+            "chipGen": {
+              "type": "string",
+              "description": "Chip token for the CLI: bt82x, bt81x, bt88x, ft81x or ft80x. Defaults to the command's own token."
+            }
+          },
+          "required": [
+            "commandName"
+          ],
+          "additionalProperties": false
+        },
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "openWorldHint": false
+        }
+      },
+      {
+        "name": "update_eab_tool_call",
+        "description": "Modify the options of a pending request (add, change, or remove) before execution. Show the updated preview to the user, then run execute_eab_tool_call with confirm=true after approval.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "requestId": {
+              "type": "string",
+              "description": "Request id returned by prepare_eab_tool_call or any typed eab_* tool."
+            },
+            "options": {
+              "type": "object",
+              "description": "Options to set or overwrite (snake_case keys). Pass null, \"\" or false to remove a key."
+            },
+            "remove": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Option keys to remove from the pending command."
+            },
+            "cliArgs": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "For raw prepare requests: replace the raw CLI arguments entirely."
+            }
+          },
+          "required": [
+            "requestId"
+          ],
+          "additionalProperties": false
+        },
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "openWorldHint": false
+        }
+      },
+      {
+        "name": "execute_eab_tool_call",
+        "description": "Final gate: run a previously prepared command only after the user has approved the exact options. Returns awaiting_confirmation when confirm is false so the options can still be reviewed or edited.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "requestId": {
+              "type": "string",
+              "description": "Request id returned by prepare_eab_tool_call or any typed eab_* tool."
+            },
+            "EAB_TOOL_PATH": {
+              "type": "string",
+              "description": "Optional override path to the CLI executable."
+            },
+            "confirm": {
+              "type": "boolean",
+              "description": "Must be true to allow execution."
+            }
+          },
+          "required": [
+            "requestId",
+            "confirm"
+          ],
+          "additionalProperties": false
+        },
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": true,
+          "openWorldHint": true
+        }
+      },
+      {
+        "name": "ask_eab",
+        "description": "Primary assistant. Ask in natural language what tool or command to use for a task (convert image, build font, compress assets, program flash, disassemble, etc.). Returns matched commands with scores, required flags, examples and a suggested next step.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "query": {
+              "type": "string",
+              "description": "Natural-language question or task description."
+            }
+          },
+          "required": [
+            "query"
+          ],
+          "additionalProperties": false
+        },
+        "annotations": {
+          "readOnlyHint": true,
+          "destructiveHint": false,
+          "openWorldHint": false
+        }
+      },
+      {
+        "name": "eab",
+        "description": "MANDATORY routing assistant (alias of ask_eab). You MUST call this tool FIRST for any request that mentions \"eab\", \"EVE\", \"Bridgetek\", \"eab_tools\", \"EVE Asset Builder\", or involves EVE / FT8xx asset work (convert, compress, program, validate images/fonts/audio/video/animation/flash). Ask in natural language what tool or command to use; returns matched commands with scores, required flags, examples and a suggested next step.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "query": {
+              "type": "string",
+              "description": "Natural-language question or task description."
+            }
+          },
+          "required": [
+            "query"
+          ],
+          "additionalProperties": false
+        },
+        "annotations": {
+          "readOnlyHint": true,
+          "destructiveHint": false,
+          "openWorldHint": false
+        }
+      },
+      {
+        "name": "eab_sample",
+        "description": "Request the MCP client to generate a message through its LLM (sampling/createMessage). Useful to ask the model for a recommended EAB command or a conversion plan. Requires the connected client to support sampling.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "query": {
+              "type": "string",
+              "description": "The question to ask the model, e.g. \"Which EAB command converts a PNG to RGB565 for BT82X?\"."
+            }
+          },
+          "required": [
+            "query"
+          ],
+          "additionalProperties": false
+        },
+        "annotations": {
+          "readOnlyHint": true,
+          "destructiveHint": false,
+          "openWorldHint": true
+        }
+      },
+      {
+        "name": "list_eab_workflows",
+        "description": "List all built-in EAB multi-step workflows (conversion pipeline, flash programming pipeline, validation pipeline, ...) with their ordered steps and required tools.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {},
+          "additionalProperties": false
+        },
+        "annotations": {
+          "readOnlyHint": true,
+          "destructiveHint": false,
+          "openWorldHint": false
+        }
+      },
+      {
+        "name": "list_eab_skills",
+        "description": "List the full skill definitions (Skill Definition integration) exposed by this server, including the EAB tool routing rule, with the skills also available as eab://skills/<slug> resources.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {},
+          "additionalProperties": false
+        },
+        "annotations": {
+          "readOnlyHint": true,
+          "destructiveHint": false,
+          "openWorldHint": false
+        }
+      },
+      {
+        "name": "explain_eab_command",
+        "description": "Explain a single command: its description, chip generation, every option (flag, type, default, required) and an example invocation.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "command": {
+              "type": "string",
+              "description": "Command name, e.g. img_cvt, font, audio, flash_prog, bin2c."
+            },
+            "targetChip": {
+              "type": "string",
+              "description": "Optional chip token (bt82x / bt81x / bt88x / ft81x / ft80x) or target chip (BT82X / Pre-BT82X)."
+            }
+          },
+          "required": [
+            "command"
+          ],
+          "additionalProperties": false
+        },
+        "annotations": {
+          "readOnlyHint": true,
+          "destructiveHint": false,
+          "openWorldHint": false
+        }
+      },
+      {
+        "name": "find_relevant_eab_tool",
+        "description": "Given a natural-language task, recommend the most relevant command(s) with a reason and an example invocation.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "task": {
+              "type": "string",
+              "description": "Description of the asset conversion / validation task."
+            }
+          },
+          "required": [
+            "task"
+          ],
+          "additionalProperties": false
+        },
+        "annotations": {
+          "readOnlyHint": true,
+          "destructiveHint": false,
+          "openWorldHint": false
+        }
+      },
+      {
+        "name": "suggest_eab_command",
+        "description": "Convert a natural-language request into a concrete command suggestion with the recommended MCP tool and the exact invocation to run.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "request": {
+              "type": "string",
+              "description": "Natural-language task, e.g. \"Convert this PNG to RGB565\"."
+            },
+            "targetChip": {
+              "type": "string",
+              "description": "Optional chip preference: BT82X or Pre-BT82X."
+            }
+          },
+          "required": [
+            "request"
+          ],
+          "additionalProperties": false
+        },
+        "annotations": {
+          "readOnlyHint": true,
+          "destructiveHint": false,
+          "openWorldHint": false
+        }
+      },
+      {
+        "name": "check_eab_installation",
+        "description": "Check whether EAB (eab_tools.exe) is installed on this PC, which version is present, and whether a newer build is available in the Bridgetek/EAB-CLI repository. Call this first when eab_tools.exe cannot be found or the user asks about installing/updating EAB.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "installDir": {
+              "type": "string",
+              "description": "Optional install directory to inspect. Defaults to %LOCALAPPDATA%\\EAB-CLI (override with EAB_CLI_INSTALL_DIR)."
+            },
+            "ref": {
+              "type": "string",
+              "description": "Branch, tag or commit of Bridgetek/EAB-CLI to compare against. Defaults to main."
+            },
+            "token": {
+              "type": "string",
+              "description": "Optional GitHub token for the private Bridgetek/EAB-CLI repository. Defaults to EAB_GITHUB_TOKEN / GITHUB_TOKEN / GH_TOKEN, then `gh auth token`."
+            },
+            "checkRemote": {
+              "type": "boolean",
+              "description": "Set false to skip the GitHub lookup and only report the local installation."
+            }
+          },
+          "additionalProperties": false
+        },
+        "annotations": {
+          "readOnlyHint": true,
+          "destructiveHint": false,
+          "openWorldHint": true
+        }
+      },
+      {
+        "name": "install_eab_cli",
+        "description": "Download and install (or update) EAB from the Bridgetek/EAB-CLI repository (https://github.com/Bridgetek/EAB-CLI) when eab_tools.exe is missing or outdated. Without confirm=true it only returns the install plan; call it again with confirm=true after the user approves.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "confirm": {
+              "type": "boolean",
+              "description": "Must be true to actually download and install. Omit to get the plan only."
+            },
+            "force": {
+              "type": "boolean",
+              "description": "Reinstall even when the installed build already matches the latest commit."
+            },
+            "installDir": {
+              "type": "string",
+              "description": "Target install directory. Defaults to %LOCALAPPDATA%\\EAB-CLI (override with EAB_CLI_INSTALL_DIR)."
+            },
+            "ref": {
+              "type": "string",
+              "description": "Branch, tag or commit of Bridgetek/EAB-CLI to install. Defaults to main."
+            },
+            "token": {
+              "type": "string",
+              "description": "Optional GitHub token for the private Bridgetek/EAB-CLI repository. Defaults to EAB_GITHUB_TOKEN / GITHUB_TOKEN / GH_TOKEN, then `gh auth token`."
+            }
+          },
+          "additionalProperties": false
+        },
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": true,
+          "openWorldHint": true
+        }
+      },
+      {
+        "name": "eab_animation",
+        "description": "animation for BT82X (BT82X): Convert GIF animation. Chip tokens: bt82x, bt81x, bt88x, ft81x, ft80x. Provide the typed options; the server builds the exact CLI invocation. Execution always requires confirmation: this tool returns a preview + requestId, then run execute_eab_tool_call with confirm=true after the user approves. Use update_eab_tool_call to adjust the options first if needed.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "gif_file": {
+              "type": "string",
+              "description": "[required] | Flag: --gif_file | Positional argument (no flag) | (required)"
+            },
+            "output_folder": {
+              "type": "string",
+              "description": "Output folder path [required] | Flag: -o / --output-folder | (required)"
+            },
+            "output_name": {
+              "type": "string",
+              "description": "Set asset name (no extension); defaults to the input base name | Flag: -n / --output-name | (optional)"
+            },
+            "astc_effort": {
+              "type": "string",
+              "description": "ASTC encoding effort level | Flag: -e / --astc-effort | Default: fastest | (optional)",
+              "enum": [
+                "thorough",
+                "exhaustive",
+                "medium",
+                "fast",
+                "fastest"
+              ]
+            },
+            "astc_block": {
+              "type": "string",
+              "description": "ASTC block footprint | Flag: -f / --astc-block | Default: 8x8 | (optional)"
+            },
+            "tile_size": {
+              "type": "string",
+              "description": "Tile size | Flag: -t / --tile-size | Default: auto | (optional)"
+            },
+            "astcenc": {
+              "type": "string",
+              "description": "Path to astcenc.exe | Flag: -x / --astcenc | (optional)"
+            },
+            "address_value": {
+              "type": "integer",
+              "description": "Memory address value (must be multiple of 4) | Flag: -v / --address-value | Default: 0 | (optional)"
+            },
+            "reloc": {
+              "type": "boolean",
+              "description": "Enable relocation | Flag: -r / --reloc | (optional)"
+            },
+            "gen_source": {
+              "type": "string",
+              "description": "Generate source file for FT4222 or MPSSE platforms | Flag: -g / --gen-source | (optional)",
+              "enum": [
+                "FT4222",
+                "MPSSE"
+              ]
+            },
+            "debug": {
+              "type": "boolean",
+              "description": "Enable debug output | Flag: --debug | (optional)"
+            },
+            "chip_gen": {
+              "type": "string",
+              "enum": [
+                "bt82x",
+                "bt81x",
+                "bt88x",
+                "ft81x",
+                "ft80x"
+              ],
+              "description": "Target chip token. One of: bt82x, bt81x, bt88x, ft81x, ft80x."
+            },
+            "EAB_TOOL_PATH": {
+              "type": "string",
+              "description": "Optional absolute path to the CLI executable. When omitted the server auto-discovers it."
+            }
+          },
+          "required": [
+            "output_folder"
+          ],
+          "additionalProperties": false
+        },
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "openWorldHint": false
+        }
+      },
+      {
+        "name": "eab_audio",
+        "description": "audio for BT82X (BT82X): Convert audio. Chip tokens: bt82x, bt81x, bt88x, ft81x, ft80x. Provide the typed options; the server builds the exact CLI invocation. Execution always requires confirmation: this tool returns a preview + requestId, then run execute_eab_tool_call with confirm=true after the user approves. Use update_eab_tool_call to adjust the options first if needed.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "infile": {
+              "type": "string",
+              "description": "Input audio file [required] | Flag: -i / --infile | (required)"
+            },
+            "outfolder": {
+              "type": "string",
+              "description": "Output folder [required] | Flag: -o / --outfolder | (required)"
+            },
+            "outformat": {
+              "type": "integer",
+              "description": "Output format: 0=LINEAR | Flag: -f / --outformat | Default: 0 | (optional)"
+            },
+            "sample_rate": {
+              "type": "integer",
+              "description": "Sample rate (0 or one of: 8000 | Flag: -s / --sample-rate | Default: 0 | (optional)"
+            },
+            "container": {
+              "type": "string",
+              "description": "Container format | Flag: -c / --container | Default: wav | (optional)",
+              "enum": [
+                "wav",
+                "raw"
+              ]
+            },
+            "channel": {
+              "type": "string",
+              "description": "Audio channel selection | Flag: -m / --channel | Default: mix | (optional)",
+              "enum": [
+                "mix",
+                "left",
+                "right"
+              ]
+            },
+            "remove_list_chunk": {
+              "type": "boolean",
+              "description": "Remove LIST chunk from WAV | Flag: -r / --remove-list-chunk | (optional)"
+            },
+            "ffmpeg_options": {
+              "type": "string",
+              "description": "Additional FFMPEG command-line options | Flag: -p / --ffmpeg-options | (optional)"
+            },
+            "gen_src": {
+              "type": "string",
+              "description": "Generate sample application for FT4222/MPSSS platform | Flag: -g / --gen-src | (optional)",
+              "enum": [
+                "FT4222",
+                "MPSSE"
+              ]
+            },
+            "debug": {
+              "type": "boolean",
+              "description": "Enable debug output | Flag: --debug | (optional)"
+            },
+            "chip_gen": {
+              "type": "string",
+              "enum": [
+                "bt82x",
+                "bt81x",
+                "bt88x",
+                "ft81x",
+                "ft80x"
+              ],
+              "description": "Target chip token. One of: bt82x, bt81x, bt88x, ft81x, ft80x."
+            },
+            "EAB_TOOL_PATH": {
+              "type": "string",
+              "description": "Optional absolute path to the CLI executable. When omitted the server auto-discovers it."
+            }
+          },
+          "required": [
+            "infile",
+            "outfolder"
+          ],
+          "additionalProperties": false
+        },
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "openWorldHint": false
+        }
+      },
+      {
+        "name": "eab_bin2c",
+        "description": "bin2c (shared) (Both): Convert binary to C array. Available for all chips. Provide the typed options; the server builds the exact CLI invocation. Execution always requires confirmation: this tool returns a preview + requestId, then run execute_eab_tool_call with confirm=true after the user approves. Use update_eab_tool_call to adjust the options first if needed.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "input_file": {
+              "type": "string",
+              "description": "Path to the input binary file. [required] | Flag: -i / --input-file | (required)"
+            },
+            "output_dir": {
+              "type": "string",
+              "description": "Output folder. [required] | Flag: -o / --output-dir | (required)"
+            },
+            "notation": {
+              "type": "string",
+              "description": "Format of array items: decimal or hexadecimal. | Flag: -f / --notation | Default: decimal | (optional)",
+              "enum": [
+                "decimal",
+                "hexa"
+              ]
+            },
+            "type": {
+              "type": "string",
+              "description": "Unsigned data type for array items: byte | Flag: -t / --type | Default: byte | (optional)",
+              "enum": [
+                "byte",
+                "word",
+                "long"
+              ]
+            },
+            "endian": {
+              "type": "string",
+              "description": "Byte order of array items. | Flag: -e / --endian | Default: little | (optional)",
+              "enum": [
+                "little",
+                "big"
+              ]
+            },
+            "num_per_line": {
+              "type": "integer",
+              "description": "Number of array elements per line. [1<=x<=9999] | Flag: -n / --num-per-line | Default: 80 | (optional)"
+            },
+            "array_name": {
+              "type": "string",
+              "description": "Name of the output array. Defaults to the input file base name. | Flag: -a / --array-name | (optional)"
+            },
+            "EAB_TOOL_PATH": {
+              "type": "string",
+              "description": "Optional absolute path to the CLI executable. When omitted the server auto-discovers it."
+            }
+          },
+          "required": [
+            "input_file",
+            "output_dir"
+          ],
+          "additionalProperties": false
+        },
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "openWorldHint": false
+        }
+      },
+      {
+        "name": "eab_compress",
+        "description": "compress (shared) (Both): Compress/decompress assets. Available for all chips. Provide the typed options; the server builds the exact CLI invocation. Execution always requires confirmation: this tool returns a preview + requestId, then run execute_eab_tool_call with confirm=true after the user approves. Use update_eab_tool_call to adjust the options first if needed.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "compress_lib": {
+              "type": "string",
+              "description": "Select compressor library | Flag: -a / --compress-lib | Default: zlib | (optional)",
+              "enum": [
+                "zlib",
+                "zopfli"
+              ]
+            },
+            "compress_level": {
+              "type": "integer",
+              "description": "Compression level from 0 to 9 [0<=x<=9] | Flag: -l / --compress-level | Default: 6 | (optional)"
+            },
+            "output_dir": {
+              "type": "string",
+              "description": "Specify the output folder path. Optional when validating only | Flag: -o / --output-dir | (optional)"
+            },
+            "name": {
+              "type": "string",
+              "description": "Set output file name | Flag: -n / --name | (optional)"
+            },
+            "validate": {
+              "type": "boolean",
+              "description": "Validate the compressed files | Flag: -v / --validate | (optional)"
+            },
+            "decompress": {
+              "type": "boolean",
+              "description": "Decompress if input files are validated | Flag: -d / --decompress | (optional)"
+            },
+            "inputs": {
+              "type": "string",
+              "description": "List of asset files separated by semicolon [required] | Flag: -i / --inputs | (required)"
+            },
+            "pad_64": {
+              "type": "boolean",
+              "description": "Align input file size to 64-byte boundary | Flag: -p / --pad-64 | (optional)"
+            },
+            "EAB_TOOL_PATH": {
+              "type": "string",
+              "description": "Optional absolute path to the CLI executable. When omitted the server auto-discovers it."
+            }
+          },
+          "required": [
+            "inputs"
+          ],
+          "additionalProperties": false
+        },
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "openWorldHint": false
+        }
+      },
+      {
+        "name": "eab_disassembler",
+        "description": "disassembler for BT82X (BT82X): Disassemble EVE commands. Chip tokens: bt82x, bt81x, bt88x, ft81x, ft80x. Provide the typed options; the server builds the exact CLI invocation. Execution always requires confirmation: this tool returns a preview + requestId, then run execute_eab_tool_call with confirm=true after the user approves. Use update_eab_tool_call to adjust the options first if needed.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "input": {
+              "type": "string",
+              "description": "Input file to disassemble. [required] | Flag: -i / --input | (required)"
+            },
+            "output_dir": {
+              "type": "string",
+              "description": "Output folder. [required] | Flag: -o / --output-dir | (required)"
+            },
+            "detail": {
+              "type": "boolean",
+              "description": "Set detailed output format. | Flag: -d / --detail | (optional)"
+            },
+            "chip_gen": {
+              "type": "string",
+              "enum": [
+                "bt82x",
+                "bt81x",
+                "bt88x",
+                "ft81x",
+                "ft80x"
+              ],
+              "description": "Target chip token. One of: bt82x, bt81x, bt88x, ft81x, ft80x."
+            },
+            "EAB_TOOL_PATH": {
+              "type": "string",
+              "description": "Optional absolute path to the CLI executable. When omitted the server auto-discovers it."
+            }
+          },
+          "required": [
+            "input",
+            "output_dir"
+          ],
+          "additionalProperties": false
+        },
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "openWorldHint": false
+        }
+      },
+      {
+        "name": "eab_flash_gen",
+        "description": "flash_gen for BT82X (BT82X): Build flash image. Chip tokens: bt82x, bt81x, bt88x, ft81x, ft80x. Provide the typed options; the server builds the exact CLI invocation. Execution always requires confirmation: this tool returns a preview + requestId, then run execute_eab_tool_call with confirm=true after the user approves. Use update_eab_tool_call to adjust the options first if needed.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "output_dir": {
+              "type": "string",
+              "description": "Set output folder [required] | Flag: -o / --output-dir | (required)"
+            },
+            "output_name": {
+              "type": "string",
+              "description": "Set output name (default: flash) | Flag: -n / --output-name | Default: flash | (optional)"
+            },
+            "blob": {
+              "type": "string",
+              "description": "Set blob file | Flag: -b / --blob | (optional)"
+            },
+            "gen_edf": {
+              "type": "boolean",
+              "description": "Generate EDF block | Flag: -d / --gen-edf | (optional)"
+            },
+            "no_align": {
+              "type": "boolean",
+              "description": "Disable alignment | Flag: -k / --no-align | (optional)"
+            },
+            "input_list": {
+              "type": "string",
+              "description": "Path to a text file listing all input files | Flag: -I / --input-list | (optional)"
+            },
+            "gen_source": {
+              "type": "string",
+              "description": "Generator source: FT4222 or MPSSE. | Flag: -g / --gen-source | Default: FT4222 | (optional)"
+            },
+            "input_files": {
+              "type": "array",
+              "description": "Flag: --input_files | Positional argument (no flag) | (optional)",
+              "items": {
+                "type": "string"
+              }
+            },
+            "chip_gen": {
+              "type": "string",
+              "enum": [
+                "bt82x",
+                "bt81x",
+                "bt88x",
+                "ft81x",
+                "ft80x"
+              ],
+              "description": "Target chip token. One of: bt82x, bt81x, bt88x, ft81x, ft80x."
+            },
+            "EAB_TOOL_PATH": {
+              "type": "string",
+              "description": "Optional absolute path to the CLI executable. When omitted the server auto-discovers it."
+            }
+          },
+          "required": [
+            "output_dir"
+          ],
+          "additionalProperties": false
+        },
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "openWorldHint": false
+        }
+      },
+      {
+        "name": "eab_flash_prog",
+        "description": "flash_prog for BT82X (BT82X): Program SPI flash. Chip tokens: bt82x, bt81x, bt88x, ft81x, ft80x. Provide the typed options; the server builds the exact CLI invocation. Execution always requires confirmation: this tool returns a preview + requestId, then run execute_eab_tool_call with confirm=true after the user approves. Use update_eab_tool_call to adjust the options first if needed.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "module": {
+              "type": "string",
+              "description": "Program module. | Flag: --module | Default: FT4222 | (optional)",
+              "enum": [
+                "FT4222",
+                "MPSSE"
+              ]
+            },
+            "frequency": {
+              "type": "integer",
+              "description": "SPI clock frequency in range 1-30 Mhz. Default: 12 MHz. | Flag: --frequency | Default: 12 | (optional)"
+            },
+            "detect": {
+              "type": "string",
+              "description": "Detect flash chip. Safe mode means no writing. | Flag: --detect | (optional)",
+              "enum": [
+                "all",
+                "safe"
+              ]
+            },
+            "check_type": {
+              "type": "boolean",
+              "description": "Check flash chip type (NOR / NAND). | Flag: --check-type | (optional)"
+            },
+            "erase": {
+              "type": "boolean",
+              "description": "Erase the entire flash chip. | Flag: --erase | (optional)"
+            },
+            "newblob": {
+              "type": "string",
+              "description": "Write blob file into flash. | Flag: --newblob | (optional)"
+            },
+            "update": {
+              "type": "string",
+              "description": "Update file to flash. | Flag: --update | (optional)"
+            },
+            "update_verify": {
+              "type": "string",
+              "description": "Update file to flash | Flag: --update-verify | (optional)"
+            },
+            "program": {
+              "type": "string",
+              "description": "Program file onto a factory-state flash chip. | Flag: --program | (optional)"
+            },
+            "program_verify": {
+              "type": "string",
+              "description": "Program file onto a factory-state flash chip | Flag: --program-verify | (optional)"
+            },
+            "verify": {
+              "type": "string",
+              "description": "Compare flash content with file. | Flag: --verify | (optional)"
+            },
+            "read": {
+              "type": "string",
+              "description": "Dump flash content to file. | Flag: --read | (optional)"
+            },
+            "read_info": {
+              "type": "boolean",
+              "description": "Retrieve flash information. | Flag: --read-info | (optional)"
+            },
+            "read_sfdp": {
+              "type": "boolean",
+              "description": "Read SFDP block. | Flag: --read-sfdp | (optional)"
+            },
+            "tx": {
+              "type": "string",
+              "description": "Send flash command. | Flag: --tx | (optional)"
+            },
+            "rx": {
+              "type": "integer",
+              "description": "Set expected response length for flash command. | Flag: --rx | Default: 1 | (optional)"
+            },
+            "write_nand": {
+              "type": "string",
+              "description": "Write file to NAND flash. | Flag: --write-nand | (optional)"
+            },
+            "write_nand_verify": {
+              "type": "string",
+              "description": "Write file to NAND flash | Flag: --write-nand-verify | (optional)"
+            },
+            "scan_nand": {
+              "type": "boolean",
+              "description": "Scan NAND flash for bad blocks. | Flag: --scan-nand | (optional)"
+            },
+            "sanitize_nand": {
+              "type": "boolean",
+              "description": "Sanitize NAND flash for bad blocks. | Flag: --sanitize-nand | (optional)"
+            },
+            "map_nand": {
+              "type": "array",
+              "description": "Map bad block to good block. Usage: --map-nand <bad_block> <good_block> | Flag: --map-nand | (optional)",
+              "items": {
+                "type": "string"
+              }
+            },
+            "offset": {
+              "type": "integer",
+              "description": "Set offset address. Default: 0. | Flag: --offset | (optional)"
+            },
+            "length": {
+              "type": "string",
+              "description": "Read length in 4096-byte aligned or 'end'. Default: 4096. | Flag: --length | (optional)"
+            },
+            "verbose": {
+              "type": "boolean",
+              "description": "Print additional messages. | Flag: --verbose | Default: False | (optional)"
+            },
+            "debug": {
+              "type": "boolean",
+              "description": "Print FT4222 handle debug messages. | Flag: --debug | Default: False | (optional)"
+            },
+            "chip_gen": {
+              "type": "string",
+              "enum": [
+                "bt82x",
+                "bt81x",
+                "bt88x",
+                "ft81x",
+                "ft80x"
+              ],
+              "description": "Target chip token. One of: bt82x, bt81x, bt88x, ft81x, ft80x."
+            },
+            "EAB_TOOL_PATH": {
+              "type": "string",
+              "description": "Optional absolute path to the CLI executable. When omitted the server auto-discovers it."
+            }
+          },
+          "required": [],
+          "additionalProperties": false
+        },
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "openWorldHint": false
+        }
+      },
+      {
+        "name": "eab_font",
+        "description": "font for BT82X (BT82X): Convert EVE fonts. Chip tokens: bt82x, bt81x, bt88x, ft81x, ft80x. Provide the typed options; the server builds the exact CLI invocation. Execution always requires confirmation: this tool returns a preview + requestId, then run execute_eab_tool_call with confirm=true after the user approves. Use update_eab_tool_call to adjust the options first if needed.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "font_struct": {
+              "type": "string",
+              "description": "Font structure. | Flag: -f / --font-struct | Default: legacy | (optional)",
+              "enum": [
+                "legacy",
+                "ext1",
+                "ext2"
+              ]
+            },
+            "infile": {
+              "type": "string",
+              "description": "Input font file. | Flag: -i / --infile | (optional)"
+            },
+            "input_range": {
+              "type": "string",
+              "description": "Input character range (e.g. | Flag: -r / --input-range | (optional)"
+            },
+            "utf8_file": {
+              "type": "string",
+              "description": "UTF-8 file to convert. | Flag: -u / --utf8-file | (optional)"
+            },
+            "output_dir": {
+              "type": "string",
+              "description": "Output directory. | Flag: -o / --output-dir | (optional)"
+            },
+            "point_size": {
+              "type": "integer",
+              "description": "Font point size. | Flag: -s / --point-size | Default: 25 | (optional)"
+            },
+            "dpi": {
+              "type": "integer",
+              "description": "DPI setting. | Flag: -D / --dpi | Default: 72 | (optional)"
+            },
+            "first_character": {
+              "type": "integer",
+              "description": "First character code. | Flag: -l / --first-character | Default: 1 | (optional)"
+            },
+            "address": {
+              "type": "integer",
+              "description": "Start address. | Flag: -d / --address | Default: 0 | (optional)"
+            },
+            "symbol": {
+              "type": "boolean",
+              "description": "Symbol font encoding. | Flag: -m / --symbol | (optional)"
+            },
+            "flag_bin": {
+              "type": "boolean",
+              "description": "Binary output flag. | Flag: -B / --flag-bin | (optional)"
+            },
+            "flag_cjk": {
+              "type": "boolean",
+              "description": "Flag for CJK fonts. | Flag: -W / --flag-cjk | (optional)"
+            },
+            "relocate": {
+              "type": "boolean",
+              "description": "Relocate font. | Flag: -R / --relocate | (optional)"
+            },
+            "add_space": {
+              "type": "boolean",
+              "description": "Assign the space character to code point 0x20. | Flag: -S / --add-space | Default: False | (optional)"
+            },
+            "gen_preview": {
+              "type": "boolean",
+              "description": "Generate preview. | Flag: -p / --gen-preview | (optional)"
+            },
+            "gen_source": {
+              "type": "string",
+              "description": "Generator source: FT4222 or MPSSE. | Flag: -g / --gen-source | (optional)"
+            },
+            "bitmap_format": {
+              "type": "string",
+              "description": "Bitmap format: ASTC | Flag: -E / --bitmap-format | Default: L4 | (optional)"
+            },
+            "debug": {
+              "type": "boolean",
+              "description": "Enable debug output | Flag: --debug | (optional)"
+            },
+            "astc_block": {
+              "type": "string",
+              "description": "ASTC block footprint. | Flag: -b / --astc-block | Default: auto | (optional)"
+            },
+            "astc_effort": {
+              "type": "string",
+              "description": "ASTC effort: thorough | Flag: -e / --astc-effort | Default: fast | (optional)"
+            },
+            "extended_kerning": {
+              "type": "boolean",
+              "description": "Enable extended kerning. | Flag: -K / --extended-kerning | (optional)"
+            },
+            "ordinal_mode": {
+              "type": "boolean",
+              "description": "Ordinal mode. | Flag: -L / --ordinal-mode | (optional)"
+            },
+            "astc_path": {
+              "type": "string",
+              "description": "Path to astcenc encoder. | Flag: -x / --astc-path | (optional)"
+            },
+            "chip_gen": {
+              "type": "string",
+              "enum": [
+                "bt82x",
+                "bt81x",
+                "bt88x",
+                "ft81x",
+                "ft80x"
+              ],
+              "description": "Target chip token. One of: bt82x, bt81x, bt88x, ft81x, ft80x."
+            },
+            "EAB_TOOL_PATH": {
+              "type": "string",
+              "description": "Optional absolute path to the CLI executable. When omitted the server auto-discovers it."
+            }
+          },
+          "required": [],
+          "additionalProperties": false
+        },
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "openWorldHint": false
+        }
+      },
+      {
+        "name": "eab_font_encode",
+        "description": "font_encode for BT82X (BT82X): Encode text by font map. Chip tokens: bt82x. Provide the typed options; the server builds the exact CLI invocation. Execution always requires confirmation: this tool returns a preview + requestId, then run execute_eab_tool_call with confirm=true after the user approves. Use update_eab_tool_call to adjust the options first if needed.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "input": {
+              "type": "string",
+              "description": "Text or path to UTF-8 text file to convert. [required] | Flag: -i / --input | (required)"
+            },
+            "json": {
+              "type": "string",
+              "description": "Path to json file from fnt_cvt. [required] | Flag: -j / --json | (required)"
+            },
+            "prefix": {
+              "type": "integer",
+              "description": "Escape prefix: 0=\\x | Flag: -e / --prefix | Default: 0 | (optional)"
+            },
+            "unknown_text": {
+              "type": "string",
+              "description": "Text to replace unknown characters (max 16 characters). | Flag: -u / --unknown-text | (optional)"
+            },
+            "output_dir": {
+              "type": "string",
+              "description": "Output folder (optional). | Flag: -o / --output-dir | (optional)"
+            },
+            "chip_gen": {
+              "type": "string",
+              "enum": [
+                "bt82x"
+              ],
+              "description": "Target chip token. One of: bt82x."
+            },
+            "EAB_TOOL_PATH": {
+              "type": "string",
+              "description": "Optional absolute path to the CLI executable. When omitted the server auto-discovers it."
+            }
+          },
+          "required": [
+            "input",
+            "json"
+          ],
+          "additionalProperties": false
+        },
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "openWorldHint": false
+        }
+      },
+      {
+        "name": "eab_font_info",
+        "description": "font_info (shared) (Both): Read font information. Available for all chips. Provide the typed options; the server builds the exact CLI invocation. Execution always requires confirmation: this tool returns a preview + requestId, then run execute_eab_tool_call with confirm=true after the user approves. Use update_eab_tool_call to adjust the options first if needed.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "input_font": {
+              "type": "string",
+              "description": "Input font file path [required] | Flag: -i / --input-font | (required)"
+            },
+            "output_dir": {
+              "type": "string",
+              "description": "Output folder | Flag: -o / --output-dir | (optional)"
+            },
+            "json": {
+              "type": "boolean",
+              "description": "Output in JSON format | Flag: -j / --json | (optional)"
+            },
+            "EAB_TOOL_PATH": {
+              "type": "string",
+              "description": "Optional absolute path to the CLI executable. When omitted the server auto-discovers it."
+            }
+          },
+          "required": [
+            "input_font"
+          ],
+          "additionalProperties": false
+        },
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "openWorldHint": false
+        }
+      },
+      {
+        "name": "eab_fwtouch",
+        "description": "fwtouch for Pre-BT82X (Pre-BT82X): Customize touch firmware. Chip tokens: bt81x, bt88x, ft81x, ft80x. Provide the typed options; the server builds the exact CLI invocation. Execution always requires confirmation: this tool returns a preview + requestId, then run execute_eab_tool_call with confirm=true after the user approves. Use update_eab_tool_call to adjust the options first if needed.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "input": {
+              "type": "string",
+              "description": "Set input C source file [required] | Flag: -i / --input | (required)"
+            },
+            "output": {
+              "type": "string",
+              "description": "Set output folder [required] | Flag: -o / --output | (required)"
+            },
+            "eve_chip": {
+              "type": "string",
+              "description": "Chip select [default: BT81X] | Flag: -c / --eve-chip | Default: BT81X | (optional)",
+              "enum": [
+                "BT81X",
+                "FT81X",
+                "BT88X"
+              ]
+            },
+            "chip_gen": {
+              "type": "string",
+              "enum": [
+                "bt81x",
+                "bt88x",
+                "ft81x",
+                "ft80x"
+              ],
+              "description": "Target chip token. One of: bt81x, bt88x, ft81x, ft80x."
+            },
+            "EAB_TOOL_PATH": {
+              "type": "string",
+              "description": "Optional absolute path to the CLI executable. When omitted the server auto-discovers it."
+            }
+          },
+          "required": [
+            "input",
+            "output"
+          ],
+          "additionalProperties": false
+        },
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "openWorldHint": false
+        }
+      },
+      {
+        "name": "eab_img_cvt",
+        "description": "img_cvt for BT82X (BT82X): Convert images. Chip tokens: bt82x, bt81x, bt88x, ft81x, ft80x. Provide the typed options; the server builds the exact CLI invocation. Execution always requires confirmation: this tool returns a preview + requestId, then run execute_eab_tool_call with confirm=true after the user approves. Use update_eab_tool_call to adjust the options first if needed.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "input": {
+              "type": "string",
+              "description": "Set input file [required] | Flag: -i / --input | (required)"
+            },
+            "output_dir": {
+              "type": "string",
+              "description": "Set output folder [required] | Flag: -o / --output-dir | (required)"
+            },
+            "output_name": {
+              "type": "string",
+              "description": "Set asset name (no extension) | Flag: -n / --output-name | (optional)"
+            },
+            "format": {
+              "type": "string",
+              "description": "Set output format (e.g. ASTC_5x5 | Flag: -f / --format | (required)"
+            },
+            "dither_algo": {
+              "type": "string",
+              "description": "Dithering algorithm (partial name accepted | Flag: -d / --dither-algo | Default: FLOYD_STEINBERG | (optional)"
+            },
+            "astc_effort": {
+              "type": "string",
+              "description": "Set ASTC effort level | Flag: -e / --astc-effort | Default: fastest | (optional)",
+              "enum": [
+                "exhaustive",
+                "thorough",
+                "medium",
+                "fast",
+                "fastest"
+              ]
+            },
+            "astc_params": {
+              "type": "string",
+              "description": "Additional ASTC encoder parameters | Flag: -a / --astc-params | (optional)"
+            },
+            "astcenc_path": {
+              "type": "string",
+              "description": "Path to astcenc.exe | Flag: -x / --astcenc-path | Default: astcenc.exe | (optional)"
+            },
+            "multi_cell_height": {
+              "type": "integer",
+              "description": "Height of multi-cell bitmap for ASTC only. | Flag: -m / --multi-cell-height | Default: -1 | (optional)"
+            },
+            "alpha_area": {
+              "type": "string",
+              "description": "LA format: Set alpha area (left | Flag: -r / --alpha-area | (optional)"
+            },
+            "alpha_value": {
+              "type": "integer",
+              "description": "LA format: Set alpha value [default: 100] | Flag: -l / --alpha-value | Default: 100 | (optional)"
+            },
+            "zorder": {
+              "type": "integer",
+              "description": "Z-order (Morton code) value (0-255). Default: -1 (disable). [-1<=x<=255] | Flag: -Z / --zorder | Default: -1 | (optional)"
+            },
+            "gen_app": {
+              "type": "string",
+              "description": "Generate sample application for FT4222/MPSSE platform | Flag: -g / --gen-app | (optional)",
+              "enum": [
+                "FT4222",
+                "MPSSE"
+              ]
+            },
+            "debug": {
+              "type": "boolean",
+              "description": "Enable debug output | Flag: --debug | (optional)"
+            },
+            "threads": {
+              "type": "integer",
+              "description": "Number of parallel threads for conversion (per-image for ASTC; strip-parallel for ordered/noise dithering). [default: 1; 1<=x<=64] | Flag: -t / --threads | Default: 1 | (optional)"
+            },
+            "chip_gen": {
+              "type": "string",
+              "enum": [
+                "bt82x",
+                "bt81x",
+                "bt88x",
+                "ft81x",
+                "ft80x"
+              ],
+              "description": "Target chip token. One of: bt82x, bt81x, bt88x, ft81x, ft80x."
+            },
+            "EAB_TOOL_PATH": {
+              "type": "string",
+              "description": "Optional absolute path to the CLI executable. When omitted the server auto-discovers it."
+            }
+          },
+          "required": [
+            "input",
+            "output_dir",
+            "format"
+          ],
+          "additionalProperties": false
+        },
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "openWorldHint": false
+        }
+      },
+      {
+        "name": "eab_img_val",
+        "description": "img_val for BT82X (BT82X): Validate image compatibility. Chip tokens: bt82x, bt81x, bt88x, ft81x, ft80x. Provide the typed options; the server builds the exact CLI invocation. Execution always requires confirmation: this tool returns a preview + requestId, then run execute_eab_tool_call with confirm=true after the user approves. Use update_eab_tool_call to adjust the options first if needed.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "input": {
+              "type": "string",
+              "description": "Set input image [required] | Flag: -i / --input | (required)"
+            },
+            "output_dir": {
+              "type": "string",
+              "description": "Set output folder | Flag: -o / --output-dir | (optional)"
+            },
+            "optimize": {
+              "type": "boolean",
+              "description": "Optimize image before validation | Flag: -c / --optimize | (optional)"
+            },
+            "chip_gen": {
+              "type": "string",
+              "enum": [
+                "bt82x",
+                "bt81x",
+                "bt88x",
+                "ft81x",
+                "ft80x"
+              ],
+              "description": "Target chip token. One of: bt82x, bt81x, bt88x, ft81x, ft80x."
+            },
+            "EAB_TOOL_PATH": {
+              "type": "string",
+              "description": "Optional absolute path to the CLI executable. When omitted the server auto-discovers it."
+            }
+          },
+          "required": [
+            "input"
+          ],
+          "additionalProperties": false
+        },
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "openWorldHint": false
+        }
+      },
+      {
+        "name": "eab_jpeg_optimize",
+        "description": "jpeg_optimize for Pre-BT82X (Pre-BT82X): Optimize JPEG. Chip tokens: bt81x, bt88x, ft81x, ft80x. Provide the typed options; the server builds the exact CLI invocation. Execution always requires confirmation: this tool returns a preview + requestId, then run execute_eab_tool_call with confirm=true after the user approves. Use update_eab_tool_call to adjust the options first if needed.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "input": {
+              "type": "string",
+              "description": "Input JPEG file [required] | Flag: -i / --input | (required)"
+            },
+            "output_dir": {
+              "type": "string",
+              "description": "Set output folder | Flag: -o / --output-dir | (optional)"
+            },
+            "quality": {
+              "type": "integer",
+              "description": "JPEG quality (1–95) [1<=x<=95] | Flag: -q / --quality | Default: 75 | (optional)"
+            },
+            "gray": {
+              "type": "boolean",
+              "description": "Convert to grayscale | Flag: -l / --gray | (optional)"
+            },
+            "print_console": {
+              "type": "boolean",
+              "description": "Print output to stdout instead of saving | Flag: -p / --print-console | (optional)"
+            },
+            "chip_gen": {
+              "type": "string",
+              "enum": [
+                "bt81x",
+                "bt88x",
+                "ft81x",
+                "ft80x"
+              ],
+              "description": "Target chip token. One of: bt81x, bt88x, ft81x, ft80x."
+            },
+            "EAB_TOOL_PATH": {
+              "type": "string",
+              "description": "Optional absolute path to the CLI executable. When omitted the server auto-discovers it."
+            }
+          },
+          "required": [
+            "input"
+          ],
+          "additionalProperties": false
+        },
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "openWorldHint": false
+        }
+      },
+      {
+        "name": "eab_raw_viewer",
+        "description": "raw_viewer for BT82X (BT82X): View RAW image. Chip tokens: bt82x, bt81x, bt88x, ft81x, ft80x. Provide the typed options; the server builds the exact CLI invocation. Execution always requires confirmation: this tool returns a preview + requestId, then run execute_eab_tool_call with confirm=true after the user approves. Use update_eab_tool_call to adjust the options first if needed.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "input": {
+              "type": "string",
+              "description": "Input image file. [required] | Flag: -i / --input | (required)"
+            },
+            "palette": {
+              "type": "string",
+              "description": "LUT file for Paletted formats. | Flag: -l / --palette | (optional)"
+            },
+            "bitmap_format": {
+              "type": "string",
+              "description": "Target bitmap format. [required] | Flag: -f / --bitmap-format | (required)"
+            },
+            "bitmap_size": {
+              "type": "string",
+              "description": "Bitmap size as WxH | Flag: -s / --bitmap-size | (required)"
+            },
+            "output_dir": {
+              "type": "string",
+              "description": "Output directory. | Flag: -o / --output-dir | (optional)"
+            },
+            "zorder": {
+              "type": "integer",
+              "description": "BITMAP_ZORDER value (0-255). Default: -1 (disabled). [-1<=x<=255] | Flag: -Z / --zorder | Default: -1 | (optional)"
+            },
+            "chip_gen": {
+              "type": "string",
+              "enum": [
+                "bt82x",
+                "bt81x",
+                "bt88x",
+                "ft81x",
+                "ft80x"
+              ],
+              "description": "Target chip token. One of: bt82x, bt81x, bt88x, ft81x, ft80x."
+            },
+            "EAB_TOOL_PATH": {
+              "type": "string",
+              "description": "Optional absolute path to the CLI executable. When omitted the server auto-discovers it."
+            }
+          },
+          "required": [
+            "input",
+            "bitmap_format",
+            "bitmap_size"
+          ],
+          "additionalProperties": false
+        },
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "openWorldHint": false
+        }
+      },
+      {
+        "name": "eab_video",
+        "description": "video for BT82X (BT82X): Convert video. Chip tokens: bt82x, bt81x, bt88x, ft81x, ft80x. Provide the typed options; the server builds the exact CLI invocation. Execution always requires confirmation: this tool returns a preview + requestId, then run execute_eab_tool_call with confirm=true after the user approves. Use update_eab_tool_call to adjust the options first if needed.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "input": {
+              "type": "string",
+              "description": "Input video file [required] | Flag: -i / --input | (required)"
+            },
+            "output_dir": {
+              "type": "string",
+              "description": "Output folder [required] | Flag: -o / --output-dir | (required)"
+            },
+            "quality": {
+              "type": "integer",
+              "description": "Quality (2=best to 31=worst) [default: 3; 2<=x<=31] | Flag: -q / --quality | Default: 3 | (optional)"
+            },
+            "resolution": {
+              "type": "string",
+              "description": "Scale format: <width>:<height> [default: 1920:1200] | Flag: -r / --resolution | Default: 1920:1200 | (optional)"
+            },
+            "frame_rate": {
+              "type": "number",
+              "description": "Frame rate (fps) | Flag: -t / --frame-rate | Default: 0 | (optional)"
+            },
+            "avg_bitrate": {
+              "type": "string",
+              "description": "Average bit rate (optional) | Flag: -a / --avg-bitrate | (optional)"
+            },
+            "max_bitrate": {
+              "type": "string",
+              "description": "Max bit rate (optional) | Flag: -m / --max-bitrate | (optional)"
+            },
+            "buffer_size": {
+              "type": "string",
+              "description": "Video buffer size (optional) | Flag: -b / --buffer-size | (optional)"
+            },
+            "audio_format": {
+              "type": "string",
+              "description": "Audio format (0-LINEAR | Flag: -f / --audio-format | Default: 3 | (optional)",
+              "enum": [
+                "0",
+                "1",
+                "2",
+                "3",
+                "4"
+              ]
+            },
+            "sample_rate": {
+              "type": "string",
+              "description": "Audio sample rate. Use 0 to keep original | Flag: -s / --sample-rate | Default: -1 | (optional)",
+              "enum": [
+                "-1",
+                "0",
+                "8000",
+                "16000",
+                "22050",
+                "32000",
+                "44100",
+                "48000"
+              ]
+            },
+            "channel": {
+              "type": "string",
+              "description": "Audio channel | Flag: -c / --channel | (optional)",
+              "enum": [
+                "mix",
+                "left",
+                "right"
+              ]
+            },
+            "ffmpeg_options": {
+              "type": "string",
+              "description": "Additional FFMPEG command-line options | Flag: -p / --ffmpeg-options | (optional)"
+            },
+            "gen_app": {
+              "type": "string",
+              "description": "Generate sample project for FT4222/MPSSE platform | Flag: -g / --gen-app | (optional)",
+              "enum": [
+                "FT4222",
+                "MPSSE"
+              ]
+            },
+            "debug": {
+              "type": "boolean",
+              "description": "Enable debug output | Flag: --debug | (optional)"
+            },
+            "chip_gen": {
+              "type": "string",
+              "enum": [
+                "bt82x",
+                "bt81x",
+                "bt88x",
+                "ft81x",
+                "ft80x"
+              ],
+              "description": "Target chip token. One of: bt82x, bt81x, bt88x, ft81x, ft80x."
+            },
+            "EAB_TOOL_PATH": {
+              "type": "string",
+              "description": "Optional absolute path to the CLI executable. When omitted the server auto-discovers it."
+            }
+          },
+          "required": [
+            "input",
+            "output_dir"
+          ],
+          "additionalProperties": false
+        },
+        "annotations": {
+          "readOnlyHint": false,
+          "destructiveHint": false,
+          "openWorldHint": false
+        }
+      }
+    ],
+    "bt82x": [
+      {
+        "name": "ask_bt82x",
+        "title": "Primary BT82x and EveApps Engineering Assistant",
+        "description": "Authoritative local BT82x engineering assistant, including BT820. Uses indexed BT82x/BT820 knowledge plus direct source-code search over the local EveApps repository configured through --eveapps. Use this tool FIRST for all BT82x-family questions, including BT820, EveApps, EVE graphics, display pipeline, rendering, widget, command buffer, register, sample project, build system, SPI, display timing, platform porting, UI generation, API usage, and debugging questions. This tool searches the user's LOCAL EveApps source tree and returns concrete source file matches, sample references, commands, and implementation details before external web search.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "query": {
+              "type": "string",
+              "description": "Natural language BT82x, BT820, or EveApps engineering question"
+            }
+          },
+          "required": [
+            "query"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "annotations": {
+          "readOnlyHint": true,
+          "destructiveHint": false,
+          "openWorldHint": false
+        },
+        "execution": {
+          "taskSupport": "forbidden"
+        }
+      },
+      {
+        "name": "generate_build_command",
+        "title": "Generate validated BT82x build command",
+        "description": "Generate a validated build command for BT82x-family targets, including BT820/EVE.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "platform": {
+              "type": "string"
+            },
+            "graphics": {
+              "type": "string"
+            },
+            "display": {
+              "type": "string"
+            },
+            "spi": {
+              "type": "string"
+            },
+            "toolchain": {
+              "type": "string",
+              "enum": [
+                "cmake",
+                "nmake"
+              ],
+              "default": "cmake"
+            }
+          },
+          "required": [
+            "platform",
+            "graphics",
+            "display",
+            "spi"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "annotations": {
+          "readOnlyHint": true,
+          "destructiveHint": false,
+          "openWorldHint": false
+        },
+        "execution": {
+          "taskSupport": "forbidden"
+        }
+      },
+      {
+        "name": "find_relevant_sample",
+        "title": "Find relevant EveApps sample",
+        "description": "Find the most relevant EveApps sample for the provided request.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "query": {
+              "type": "string",
+              "minLength": 3
+            },
+            "platform": {
+              "type": "string"
+            },
+            "display": {
+              "type": "string"
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10,
+              "default": 3
+            }
+          },
+          "required": [
+            "query"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "annotations": {
+          "readOnlyHint": true,
+          "destructiveHint": false,
+          "openWorldHint": false
+        },
+        "execution": {
+          "taskSupport": "forbidden"
+        }
+      },
+      {
+        "name": "explain_eve_symbol",
+        "title": "Explain BT82x/EVE symbol",
+        "description": "Explain a BT82x-family command symbol, including BT820/EVE, using indexed data.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "symbol": {
+              "type": "string",
+              "minLength": 2
+            }
+          },
+          "required": [
+            "symbol"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "annotations": {
+          "readOnlyHint": true,
+          "destructiveHint": false,
+          "openWorldHint": false
+        },
+        "execution": {
+          "taskSupport": "forbidden"
+        }
+      },
+      {
+        "name": "generate_screen_scaffold",
+        "title": "Generate screen scaffold",
+        "description": "Generate a BT82x-family screen scaffold, including BT820, from inputs.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "screen_type": {
+              "type": "string"
+            },
+            "controls": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "default": []
+            },
+            "touch": {
+              "type": "boolean",
+              "default": true
+            },
+            "platform": {
+              "type": "string"
+            },
+            "style": {
+              "type": "string",
+              "default": "repo-native-c"
+            },
+            "flash": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          "required": [
+            "screen_type"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "annotations": {
+          "readOnlyHint": true,
+          "destructiveHint": false,
+          "openWorldHint": false
+        },
+        "execution": {
+          "taskSupport": "forbidden"
+        }
+      },
+      {
+        "name": "validate_bt82x_code",
+        "title": "Validate BT82x code for issues",
+        "description": "Validate BT82x-family code, including BT820/EVE.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "code": {
+              "type": "string",
+              "minLength": 1
+            },
+            "platform": {
+              "type": "string"
+            },
+            "display": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "code"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "annotations": {
+          "readOnlyHint": true,
+          "destructiveHint": false,
+          "openWorldHint": false
+        },
+        "execution": {
+          "taskSupport": "forbidden"
+        }
+      },
+      {
+        "name": "trace_feature_to_commands",
+        "title": "Trace feature to BT82x commands",
+        "description": "Trace BT82x-family feature usage, including BT820, to commands.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "feature": {
+              "type": "string",
+              "minLength": 2
+            }
+          },
+          "required": [
+            "feature"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "annotations": {
+          "readOnlyHint": true,
+          "destructiveHint": false,
+          "openWorldHint": false
+        },
+        "execution": {
+          "taskSupport": "forbidden"
+        }
+      },
+      {
+        "name": "bt82x_read_file",
+        "title": "Read raw source file",
+        "description": "Read the raw contents of a file from the local EveApps repository.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "relative_path": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Path to a source file under the local EveApps repo, for example: SampleApp/Widget/Src/Widget.c"
+            }
+          },
+          "required": [
+            "relative_path"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "annotations": {
+          "readOnlyHint": true,
+          "destructiveHint": false,
+          "openWorldHint": false
+        },
+        "execution": {
+          "taskSupport": "forbidden"
+        }
+      }
+    ],
+    "pre82x": [
+      {
+        "name": "ask_pre820",
+        "title": "Primary PRE820 and EveApps Engineering Assistant",
+        "description": "Authoritative local PRE820 engineering assistant. Uses indexed PRE820 knowledge plus direct source-code search over the local EveApps repository configured through --eveapps. Use this tool FIRST for all PRE820, EveApps, EVE graphics, display pipeline, rendering, widget, command buffer, register, sample project, build system, SPI, display timing, platform porting, UI generation, API usage, and debugging questions. Treat EVE_CoDl_xxx helpers and corresponding XXX macros, and EVE_CoCmd_xxx helpers and corresponding CMD_XXX tokens from EVE_GpuDefs.h, as equivalent during retrieval and usage analysis. Prefer EVE_CoDl_xxx and EVE_CoCmd_xxx helpers in generated application code unless a packed or intentionally low-level command word is required. This tool searches the user's LOCAL EveApps source tree and returns concrete source file matches, sample references, commands, and implementation details before external web search.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "query": {
+              "type": "string",
+              "description": "Natural language PRE820/EveApps engineering question"
+            }
+          },
+          "required": [
+            "query"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "annotations": {
+          "readOnlyHint": true,
+          "destructiveHint": false,
+          "openWorldHint": false
+        },
+        "execution": {
+          "taskSupport": "forbidden"
+        }
+      },
+      {
+        "name": "generate_build_command",
+        "title": "Generate validated PRE820 build command",
+        "description": "Generate a validated build command for PRE820/EVE targets.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "platform": {
+              "type": "string",
+              "minLength": 1
+            },
+            "graphics": {
+              "type": "string",
+              "minLength": 1
+            },
+            "display": {
+              "type": "string",
+              "minLength": 1
+            },
+            "toolchain": {
+              "type": "string",
+              "enum": [
+                "cmake",
+                "nmake"
+              ],
+              "default": "cmake"
+            },
+            "project": {
+              "type": "string",
+              "maxLength": 120,
+              "pattern": "^[A-Za-z0-9][A-Za-z0-9_.+-]*$"
+            },
+            "ft9xx_toolchain": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 260,
+              "pattern": "^(?:[A-Za-z]:[\\\\/]|\\/)[A-Za-z0-9 _().+\\\\/-]+$"
+            }
+          },
+          "required": [
+            "platform",
+            "graphics",
+            "display"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "annotations": {
+          "readOnlyHint": true,
+          "destructiveHint": false,
+          "openWorldHint": false
+        },
+        "execution": {
+          "taskSupport": "forbidden"
+        }
+      },
+      {
+        "name": "find_relevant_sample",
+        "title": "Find relevant EveApps sample",
+        "description": "Find the most relevant EveApps sample for the provided request.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "query": {
+              "type": "string",
+              "minLength": 3
+            },
+            "platform": {
+              "type": "string"
+            },
+            "display": {
+              "type": "string"
+            },
+            "limit": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 10,
+              "default": 3
+            }
+          },
+          "required": [
+            "query"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "annotations": {
+          "readOnlyHint": true,
+          "destructiveHint": false,
+          "openWorldHint": false
+        },
+        "execution": {
+          "taskSupport": "forbidden"
+        }
+      },
+      {
+        "name": "explain_eve_symbol",
+        "title": "Explain PRE820/EVE symbol",
+        "description": "Explain a PRE820/EVE helper or GPU macro, including canonical EVE_CoDl and EVE_CoCmd helpers. Prefer helpers over raw XXX and CMD_XXX macros in generated application code.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "symbol": {
+              "type": "string",
+              "minLength": 2
+            },
+            "graphics": {
+              "type": "string",
+              "minLength": 1
+            },
+            "family": {
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": [
+            "symbol"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "annotations": {
+          "readOnlyHint": true,
+          "destructiveHint": false,
+          "openWorldHint": false
+        },
+        "execution": {
+          "taskSupport": "forbidden"
+        }
+      },
+      {
+        "name": "generate_screen_scaffold",
+        "title": "Generate screen scaffold",
+        "description": "Generate a PRE820 screen scaffold from inputs.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "screen_type": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 80
+            },
+            "controls": {
+              "type": "array",
+              "items": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "maxItems": 50,
+              "default": []
+            },
+            "touch": {
+              "type": "boolean",
+              "default": true
+            },
+            "platform": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 80
+            },
+            "style": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 40,
+              "default": "repo-native-c"
+            },
+            "flash": {
+              "type": "boolean",
+              "default": false
+            }
+          },
+          "required": [
+            "screen_type"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "annotations": {
+          "readOnlyHint": true,
+          "destructiveHint": false,
+          "openWorldHint": false
+        },
+        "execution": {
+          "taskSupport": "forbidden"
+        }
+      },
+      {
+        "name": "validate_pre820_code",
+        "title": "Validate PRE820 code for issues",
+        "description": "Validate PRE820/EVE code and recommend EVE_CoDl or EVE_CoCmd helpers for equivalent raw GPU macros, while allowing intentional packed command usage.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "code": {
+              "type": "string",
+              "minLength": 1
+            },
+            "platform": {
+              "type": "string"
+            },
+            "display": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "code"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "annotations": {
+          "readOnlyHint": true,
+          "destructiveHint": false,
+          "openWorldHint": false
+        },
+        "execution": {
+          "taskSupport": "forbidden"
+        }
+      },
+      {
+        "name": "trace_feature_to_commands",
+        "title": "Trace feature to PRE820 commands",
+        "description": "Trace feature usage to commands.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "feature": {
+              "type": "string",
+              "minLength": 2
+            }
+          },
+          "required": [
+            "feature"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "annotations": {
+          "readOnlyHint": true,
+          "destructiveHint": false,
+          "openWorldHint": false
+        },
+        "execution": {
+          "taskSupport": "forbidden"
+        }
+      },
+      {
+        "name": "pre820_read_file",
+        "title": "Read raw source file",
+        "description": "Read the raw contents of a file from the local EveApps repository.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "relative_path": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 4096,
+              "description": "Path to a source file under the local EveApps repo, for example: SampleApp/Widget/Src/Widget.c"
+            }
+          },
+          "required": [
+            "relative_path"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "annotations": {
+          "readOnlyHint": true,
+          "destructiveHint": false,
+          "openWorldHint": false
+        },
+        "execution": {
+          "taskSupport": "forbidden"
+        }
+      },
+      {
+        "name": "lookup_module_graphics",
+        "title": "Lookup module and graphics metadata",
+        "description": "Resolve module codes and graphics chip metadata from the local PRE820 indexes.",
+        "inputSchema": {
+          "type": "object",
+          "properties": {
+            "module": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Module product code or graphics chip name, for example ME817EV, EVE_GRAPHICS_ME817EV, or BT817"
+            }
+          },
+          "required": [
+            "module"
+          ],
+          "additionalProperties": false,
+          "$schema": "http://json-schema.org/draft-07/schema#"
+        },
+        "annotations": {
+          "readOnlyHint": true,
+          "destructiveHint": false,
+          "openWorldHint": false
+        },
+        "execution": {
+          "taskSupport": "forbidden"
+        }
+      }
+    ]
+  },
+  "summary": {
+    "passed": 31,
+    "failed": 0
+  }
+}

@@ -1,0 +1,4 @@
+interface:
+  default_prompt: Help me create a Bridgetek EVE GUI application based on an appropriate EveApps sample.
+  display_name: Bridgetek EVE Assistant
+  short_description: EVE graphics and GUI apps

@@ -1,0 +1,20 @@
+Subject: Request for local MCP plugin submission eligibility — Bridgetek EVE Assistant
+
+Hello,
+
+We would like to request approval and organization allowlisting for a desktop-only plugin submission under Bridgetek Pte Ltd.
+
+Organization: Bridgetek Software Team
+Organization ID: org-BGVckk3rDI3zwh4h1hR9rgqx
+Plugin: Bridgetek EVE Assistant
+
+Our existing skills-only submission draft (0.9.13) reports that further skills-only submissions are not being accepted. We have prepared a separate desktop candidate combining our EVE engineering skills with three published Bridgetek local MCP servers: EAB, EveApps-BT82X and EveApps-Pre82X. These support local asset-development workflows and generation-specific source/API/sample lookup. No payments or purchases are provided by the plugin.
+
+The desktop candidate requires local repositories and Node.js; actual EAB execution requires a local EAB installation and operation-specific user approval. We are completing host-level review evidence and updating the company listing/privacy pages.
+
+Please confirm our eligibility for local MCP submissions, the allowlisting procedure, and the supported way to create the new MCP-containing submission while preserving the existing skills-only draft. Please also advise how multiple local servers are reviewed under the current process.
+
+Thank you,
+Bridgetek Software Team
+
+DRAFT ONLY — not sent. Confirm the publisher identity and facts before sending to your OpenAI representative or official support channel.

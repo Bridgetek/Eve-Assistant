@@ -1,0 +1,31 @@
+{
+  "mcpServers": {
+    "eab": {
+      "type": "stdio",
+      "command": "node",
+      "args": [
+        "${PLUGIN_ROOT}/scripts/launch.mjs",
+        "eab"
+      ],
+      "cwd": "${PLUGIN_ROOT}"
+    },
+    "bt82x": {
+      "type": "stdio",
+      "command": "node",
+      "args": [
+        "${PLUGIN_ROOT}/scripts/launch.mjs",
+        "bt82x"
+      ],
+      "cwd": "${PLUGIN_ROOT}"
+    },
+    "pre82x": {
+      "type": "stdio",
+      "command": "node",
+      "args": [
+        "${PLUGIN_ROOT}/scripts/launch.mjs",
+        "pre82x"
+      ],
+      "cwd": "${PLUGIN_ROOT}"
+    }
+  }
+}

@@ -1,0 +1,2958 @@
+{
+  "$comment": "Single MCP server specification. The engine (src/script) reads ONLY this file — server identity, skills, tools, messages, outputs and the inline catalog.commands. A brand-new MCP server can be created by writing a new spec file — no source changes required. Override the spec path with EAB_MCP_SPEC env var or --spec <path>.",
+  "server": {
+    "name": "EAB MCP server",
+    "version": "0.0.14",
+    "description": "MCP server for Bridgetek Eve Asset Builder (EAB Tools). Exposes typed per-command tools, a natural-language assistant, and a mandatory confirmation flow before executing eab_tools.exe.",
+    "instructions": "You are connected to the Bridgetek Eve Asset Builder (EAB) MCP server, which drives eab_tools.exe to convert, compress, validate and program EVE graphics assets (images, fonts, audio, video, GIF animations, raw pixel buffers, SPI flash images).\n\nMANDATORY ROUTING RULE:\n- Whenever the user request mentions \"eab\", \"EVE\", \"Bridgetek\", \"eab_tools\", \"EVE Asset Builder\", or involves EVE / FT8xx graphics asset work (conversion, compression, flash programming, validation, font/image/audio/video/animation), you MUST call the `eab` tool first. It is the primary assistant that finds the correct command and next step.\n- Do not guess a command or invoke an eab_* tool directly until `eab` has pointed you to the right command.\n- For multi-step jobs follow the workflow prompts (eab-workflow-*) and read the eab://workflows resource.\n\nEXECUTION RULE:\n- Asset-changing tools (eab_*) never run directly. They return a preview + requestId. Get the user to approve, then call execute_eab_tool_call with confirm=true. Use update_eab_tool_call to adjust options before running.\n- Read eab://catalog to see every command, eab://skills to see available skills, eab://prompts for reusable templates, and this message for guidance.\n\nINSTALL / UPDATE RULE:\n- If eab_tools.exe cannot be found, or the user asks to install or update EAB, call check_eab_installation first.\n- Then offer to download EAB from https://github.com/Bridgetek/EAB-CLI with install_eab_cli. It returns a plan; call it again with confirm=true only after the user approves.\n- The downloaded package is unpacked into %LOCALAPPDATA%\\EAB-CLI and is picked up automatically by eab_tools.exe discovery.\n\nVERSION HANDLING:\n- The server follows the eab_tools.exe you select. Passing EAB_TOOL_PATH for a build of another EAB version switches the loaded spec automatically; no restart is needed.\n- When several eab_tools.exe builds are installed, the response lists `candidates` (path, version, flavor, managed). Ask the user which one to use, then pass it as EAB_TOOL_PATH.\n- EAB 4.6+ uses chip tokens bt82x / bt81x / bt88x / ft81x / ft80x; EAB <= 4.5 uses 82x / pre82x. Never mix tokens from the other version.\n- If a response contains cliVersionWarning, the spec could not be switched (explicit EAB_MCP_SPEC/--spec). Tell the user which spec to load."
+  },
+  "skills": [
+    {
+      "name": "EAB engineering assistant",
+      "description": "Answer natural-language questions about EAB tools and commands."
+    },
+    {
+      "name": "EAB tool routing",
+      "description": "Route any request mentioning eab / EVE / Bridgetek or EVE asset work to the `eab` tool first."
+    },
+    {
+      "name": "workflow guidance",
+      "description": "Multi-step EAB workflows: asset conversion pipeline, flash programming pipeline, validation pipeline. See eab://workflows and the eab-workflow-* prompts."
+    },
+    {
+      "name": "asset conversion",
+      "description": "Convert images, fonts, audio, video, animations and raw pixel buffers."
+    },
+    {
+      "name": "compression",
+      "description": "Compress / decompress assets with zlib or zopfli."
+    },
+    {
+      "name": "flash management",
+      "description": "Build flash images and program / verify SPI flash over USB."
+    },
+    {
+      "name": "validation and inspection",
+      "description": "Validate images, inspect fonts, view raw buffers and disassemble display lists."
+    },
+    {
+      "name": "code generation",
+      "description": "Generate C arrays and sample applications for FT4222 / MPSSE."
+    }
+  ],
+  "messages": {
+    "missing_commandName": "Missing commandName.",
+    "invalid_tool_path": "EAB_TOOL_PATH is missing or invalid.",
+    "unknown_command": "Unknown commandName: {command}",
+    "unknown_command_group": "Unknown command group: {command}",
+    "unknown_command_explain": "Unknown command: {command}",
+    "missing_requestId": "Missing requestId.",
+    "unknown_request": "No pending request found for {requestId}.",
+    "missing_query": "Missing query.",
+    "missing_command_arg": "Missing command.",
+    "missing_task": "Missing task.",
+    "missing_request": "Missing request (natural-language description of the task).",
+    "unknown_tool": "Unknown tool: {name}",
+    "prepare_confirm_message": "Please confirm the options with the user before execution.",
+    "typed_confirmation_required": "Execution is blocked until you confirm. Review the options below, ask the user if they are OK, use update_eab_tool_call to add/remove/change any option, then run execute_eab_tool_call with confirm=true.",
+    "awaiting_confirmation": "Execution is blocked until the user confirms the exact options. Review the command with the user; use update_eab_tool_call to add/remove/change options, then call this tool again with confirm=true.",
+    "confirm_title": "Confirm EAB tool execution",
+    "confirm_question": "Are these options OK? Do you want to add, remove, or change any option before running?",
+    "update_confirm_question": "Are these options OK now? You can still adjust them before running.",
+    "updated_message": "Options updated. Show the new preview to the user for a final check, then run execute_eab_tool_call with confirm=true to execute.",
+    "no_match_message": "No EAB command matches the request: \"{request}\"",
+    "no_match_tip": "Describe the asset type (image / font / audio / video / animation / flash) and the action (convert / validate / program / compress).",
+    "no_match_catalog_message": "No command reference found for: \"{query}\"",
+    "no_match_catalog_tip": "Try a task description such as \"convert an image\", \"build a font\", \"program SPI flash\", \"compress assets\", or list everything with list_eab_catalog.",
+    "no_match_task_message": "No tool matches: \"{task}\"",
+    "no_match_task_tip": "Try describing the asset type (image / font / audio / video / animation / flash) and the action (convert / validate / program / compress).",
+    "ask_found": "Found {count} command reference(s) for: \"{query}\"",
+    "ask_suggestion": "Call {tool} with the requested options, or prepare_eab_tool_call with commandName=\"{command}\" (targetChip=\"{chip}\") to run it through the two-step confirmation flow.",
+    "available_commands": "Available commands"
+  },
+  "outputs": {
+    "statuses": [
+      "confirmation_required",
+      "awaiting_confirmation",
+      "updated",
+      "completed",
+      "failed",
+      "invalid_request",
+      "unknown_command",
+      "unknown_request",
+      "unknown_tool",
+      "ok",
+      "no_match",
+      "choose_eab_tool_path",
+      "ask_user_for_eab_tool_path"
+    ],
+    "responseFields": {
+      "confirmation_required": [
+        "status",
+        "requestId",
+        "toolPath",
+        "commandName",
+        "targetChip",
+        "summary",
+        "options",
+        "cliArgs",
+        "missingRequired",
+        "message",
+        "confirmationPrompt"
+      ],
+      "awaiting_confirmation": [
+        "status",
+        "message",
+        "summary",
+        "cliArgs",
+        "options",
+        "pendingRequest"
+      ],
+      "updated": [
+        "status",
+        "requestId",
+        "commandName",
+        "summary",
+        "cliArgs",
+        "options",
+        "message",
+        "confirmationPrompt"
+      ],
+      "completed": [
+        "status",
+        "requestId",
+        "commandName",
+        "toolPath",
+        "exitCode",
+        "stdout",
+        "stderr"
+      ],
+      "failed": [
+        "status",
+        "requestId",
+        "commandName",
+        "toolPath",
+        "exitCode",
+        "stdout",
+        "stderr"
+      ],
+      "invalid_request": [
+        "status",
+        "message"
+      ],
+      "unknown_command": [
+        "status",
+        "message",
+        "availableCommands"
+      ],
+      "unknown_request": [
+        "status",
+        "message"
+      ],
+      "unknown_tool": [
+        "status",
+        "message"
+      ],
+      "ok": [
+        "status",
+        "command",
+        "targetChip",
+        "chipGen",
+        "toolName",
+        "description",
+        "invocation",
+        "arguments"
+      ]
+    }
+  },
+  "catalog": {
+    "commands": [
+      {
+        "toolType": "animation",
+        "targetChip": "BT82X",
+        "toolName": "animation for BT82X",
+        "descriptionShort": "Convert GIF animation",
+        "command": "eab_tools.exe 82x animation",
+        "commandName": "animation",
+        "chipGen": "82x",
+        "arguments": [
+          {
+            "shortFlag": "(arg)",
+            "longFlag": "gif_file",
+            "type": "path(exists)",
+            "defaultValue": "",
+            "required": true,
+            "description": "Input GIF animation file"
+          },
+          {
+            "shortFlag": "-o",
+            "longFlag": "--output-folder",
+            "type": "path",
+            "defaultValue": "",
+            "required": true,
+            "description": "Output folder path [required]"
+          },
+          {
+            "shortFlag": "-n",
+            "longFlag": "--output-name",
+            "type": "string",
+            "defaultValue": "output",
+            "required": false,
+            "description": "Set asset name (no extension)"
+          },
+          {
+            "shortFlag": "-e",
+            "longFlag": "--astc-effort",
+            "type": "choice[thorough|exhaustive|medium|fast|fastest]",
+            "defaultValue": "fastest",
+            "required": false,
+            "description": "ASTC encoding effort level"
+          },
+          {
+            "shortFlag": "-f",
+            "longFlag": "--astc-block",
+            "type": "choice",
+            "defaultValue": "8x8",
+            "required": false,
+            "description": "ASTC block footprint"
+          },
+          {
+            "shortFlag": "-t",
+            "longFlag": "--tile-size",
+            "type": "string",
+            "defaultValue": "auto",
+            "required": false,
+            "description": "Tile size, \"not apply\", \"auto\", or e.g., 3x4"
+          },
+          {
+            "shortFlag": "-x",
+            "longFlag": "--astcenc",
+            "type": "path",
+            "defaultValue": "",
+            "required": false,
+            "description": "Path to astcenc.exe"
+          },
+          {
+            "shortFlag": "-v",
+            "longFlag": "--address-value",
+            "type": "int",
+            "defaultValue": "0",
+            "required": false,
+            "description": "Memory address value (must be multiple of 4)"
+          },
+          {
+            "shortFlag": "-r",
+            "longFlag": "--reloc",
+            "type": "flag",
+            "defaultValue": "",
+            "required": false,
+            "description": "Enable relocation"
+          },
+          {
+            "shortFlag": "-g",
+            "longFlag": "--gen-source",
+            "type": "choice[FT4222|MPSSE]",
+            "defaultValue": "",
+            "required": false,
+            "description": "Generate source file for FT4222 or MPSSE platforms"
+          },
+          {
+            "shortFlag": "",
+            "longFlag": "--version",
+            "type": "",
+            "defaultValue": "",
+            "required": false,
+            "description": "Show the version and exit"
+          },
+          {
+            "shortFlag": "-h",
+            "longFlag": "--help",
+            "type": "",
+            "defaultValue": "",
+            "required": false,
+            "description": "Show the help and exit."
+          }
+        ]
+      },
+      {
+        "toolType": "animation",
+        "targetChip": "Pre-BT82X",
+        "toolName": "animation for Previous EVE chip",
+        "descriptionShort": "",
+        "command": "eab_tools.exe pre82x animation",
+        "commandName": "animation",
+        "chipGen": "pre82x",
+        "arguments": [
+          {
+            "shortFlag": "(arg)",
+            "longFlag": "gif_file",
+            "type": "path(exists)",
+            "defaultValue": "",
+            "required": true,
+            "description": "Input GIF animation file"
+          },
+          {
+            "shortFlag": "-o",
+            "longFlag": "--output-folder",
+            "type": "path(exists)",
+            "defaultValue": "",
+            "required": true,
+            "description": "Output folder path [required]"
+          },
+          {
+            "shortFlag": "-n",
+            "longFlag": "--output-name",
+            "type": "string",
+            "defaultValue": "output",
+            "required": false,
+            "description": "Set asset name (no extension)"
+          },
+          {
+            "shortFlag": "-e",
+            "longFlag": "--astc-effort",
+            "type": "choice[thorough|exhaustive|medium|fast|fastest]",
+            "defaultValue": "fastest",
+            "required": false,
+            "description": "ASTC encoding effort level"
+          },
+          {
+            "shortFlag": "-f",
+            "longFlag": "--astc-block",
+            "type": "choice",
+            "defaultValue": "8x8",
+            "required": false,
+            "description": "ASTC block footprint"
+          },
+          {
+            "shortFlag": "-t",
+            "longFlag": "--tile-size",
+            "type": "string",
+            "defaultValue": "auto",
+            "required": false,
+            "description": "Tile size, \"not apply\", \"auto\", or e.g., 3x4"
+          },
+          {
+            "shortFlag": "-x",
+            "longFlag": "--astc-encode",
+            "type": "path(exists)",
+            "defaultValue": "astcenc.exe",
+            "required": false,
+            "description": "Path to astc encoder"
+          },
+          {
+            "shortFlag": "-a",
+            "longFlag": "--memory-type",
+            "type": "choice[FLASH|RAM_G]",
+            "defaultValue": "FLASH",
+            "required": false,
+            "description": "Memory device: RAM_G or FLASH"
+          },
+          {
+            "shortFlag": "-v",
+            "longFlag": "--address-value",
+            "type": "int",
+            "defaultValue": "0",
+            "required": false,
+            "description": "Memory address value (must be multiple of 4)"
+          },
+          {
+            "shortFlag": "-g",
+            "longFlag": "--gen-app",
+            "type": "flag",
+            "defaultValue": "False",
+            "required": false,
+            "description": "Generate sample application"
+          },
+          {
+            "shortFlag": "",
+            "longFlag": "--version",
+            "type": "",
+            "defaultValue": "",
+            "required": false,
+            "description": "Show the version and exit"
+          },
+          {
+            "shortFlag": "-h",
+            "longFlag": "--help",
+            "type": "",
+            "defaultValue": "",
+            "required": false,
+            "description": "Show the help and exit."
+          }
+        ]
+      },
+      {
+        "toolType": "audio",
+        "targetChip": "BT82X",
+        "toolName": "audio for BT82X",
+        "descriptionShort": "Convert audio",
+        "command": "eab_tools.exe 82x audio",
+        "commandName": "audio",
+        "chipGen": "82x",
+        "arguments": [
+          {
+            "shortFlag": "-i",
+            "longFlag": "--infile",
+            "type": "path(exists)",
+            "defaultValue": "",
+            "required": true,
+            "description": "Input audio file [required]"
+          },
+          {
+            "shortFlag": "-o",
+            "longFlag": "--outfolder",
+            "type": "path",
+            "defaultValue": "",
+            "required": true,
+            "description": "Output folder [required]"
+          },
+          {
+            "shortFlag": "-s",
+            "longFlag": "--sample-rate",
+            "type": "int",
+            "defaultValue": "0",
+            "required": false,
+            "description": "Sample rate (0 or one of: 8000, 11025, 16000, 22050, 32000, 37800, 44056, 44100, 48000) [default: 0]"
+          },
+          {
+            "shortFlag": "-c",
+            "longFlag": "--container",
+            "type": "choice[wav|raw]",
+            "defaultValue": "wav",
+            "required": false,
+            "description": "Container format"
+          },
+          {
+            "shortFlag": "-m",
+            "longFlag": "--channel",
+            "type": "choice[mix|left|right]",
+            "defaultValue": "mix",
+            "required": false,
+            "description": "Audio channel selection"
+          },
+          {
+            "shortFlag": "-r",
+            "longFlag": "--remove-list-chunk",
+            "type": "flag",
+            "defaultValue": "",
+            "required": false,
+            "description": "Remove LIST chunk from WAV"
+          },
+          {
+            "shortFlag": "-p",
+            "longFlag": "--ffmpeg-options",
+            "type": "string",
+            "defaultValue": "",
+            "required": false,
+            "description": "Additional FFMPEG command-line options"
+          },
+          {
+            "shortFlag": "-g",
+            "longFlag": "--gen-src",
+            "type": "choice[FT4222|MPSSE]",
+            "defaultValue": "",
+            "required": false,
+            "description": "Generate sample application for FT4222/MPSSS platform"
+          },
+          {
+            "shortFlag": "",
+            "longFlag": "--version",
+            "type": "",
+            "defaultValue": "",
+            "required": false,
+            "description": "Show the version and exit."
+          },
+          {
+            "shortFlag": "-h",
+            "longFlag": "--help",
+            "type": "",
+            "defaultValue": "",
+            "required": false,
+            "description": "Show the help and exit."
+          }
+        ]
+      },
+      {
+        "toolType": "audio",
+        "targetChip": "Pre-BT82X",
+        "toolName": "audio for Previous EVE chip",
+        "descriptionShort": "",
+        "command": "eab_tools.exe pre82x audio",
+        "commandName": "audio",
+        "chipGen": "pre82x",
+        "arguments": [
+          {
+            "shortFlag": "-i",
+            "longFlag": "--input",
+            "type": "path(exists)",
+            "defaultValue": "",
+            "required": true,
+            "description": "Input auido file [required]"
+          },
+          {
+            "shortFlag": "-o",
+            "longFlag": "--output",
+            "type": "path",
+            "defaultValue": "",
+            "required": true,
+            "description": "Output folder [required]"
+          },
+          {
+            "shortFlag": "-s",
+            "longFlag": "--sample-rate",
+            "type": "choice",
+            "defaultValue": "",
+            "required": true,
+            "description": "Sample rate (0 or one of: 8000, 11025, 16000, 22050, 32000, 37800, 44056, 44100, 48000) [default: 0]"
+          },
+          {
+            "shortFlag": "-w",
+            "longFlag": "--writehdr",
+            "type": "flag",
+            "defaultValue": "",
+            "required": false,
+            "description": "Write header (output .mov). Not suitable for EVE usage"
+          },
+          {
+            "shortFlag": "-p",
+            "longFlag": "--ffmpeg-options",
+            "type": "string",
+            "defaultValue": "",
+            "required": false,
+            "description": "Additional FFMPEG command-line options"
+          },
+          {
+            "shortFlag": "-g",
+            "longFlag": "--gen-app",
+            "type": "flag",
+            "defaultValue": "",
+            "required": false,
+            "description": "Generate sample application"
+          },
+          {
+            "shortFlag": "",
+            "longFlag": "--version",
+            "type": "",
+            "defaultValue": "",
+            "required": false,
+            "description": "Show the version and exit."
+          },
+          {
+            "shortFlag": "-h",
+            "longFlag": "--help",
+            "type": "",
+            "defaultValue": "",
+            "required": false,
+            "description": "Show the help and exit."
+          }
+        ]
+      },
+      {
+        "toolType": "bin2c",
+        "targetChip": "Both",
+        "toolName": "bin2c (Legaxy)",
+        "descriptionShort": "Convert binary to C array",
+        "command": "eab_tools.exe  bin2c",
+        "commandName": "bin2c",
+        "chipGen": null,
+        "arguments": [
+          {
+            "shortFlag": "-i",
+            "longFlag": "--input-file",
+            "type": "path(exists)",
+            "defaultValue": "",
+            "required": true,
+            "description": "Path to the input binary file. [required]"
+          },
+          {
+            "shortFlag": "-o",
+            "longFlag": "--output-dir",
+            "type": "path(dir)",
+            "defaultValue": "",
+            "required": true,
+            "description": "Output folder. [required]"
+          },
+          {
+            "shortFlag": "-f",
+            "longFlag": "--notation",
+            "type": "choice[decimal|hexa]",
+            "defaultValue": "decimal",
+            "required": false,
+            "description": "Format of array items: decimal or hexadecimal."
+          },
+          {
+            "shortFlag": "-t",
+            "longFlag": "--type",
+            "type": "choice[byte|word|long]",
+            "defaultValue": "",
+            "required": false,
+            "description": "Unsigned data type for array items: byte, word, or long."
+          },
+          {
+            "shortFlag": "-e",
+            "longFlag": "--endian",
+            "type": "choice[little|big]",
+            "defaultValue": "",
+            "required": false,
+            "description": "Byte order of array items."
+          },
+          {
+            "shortFlag": "-n",
+            "longFlag": "--num-per-line",
+            "type": "IntRange(1-9999)",
+            "defaultValue": "80",
+            "required": false,
+            "description": "Number of array elements per line. [1<=x<=9999]"
+          },
+          {
+            "shortFlag": "-a",
+            "longFlag": "--array-name",
+            "type": "string",
+            "defaultValue": "",
+            "required": false,
+            "description": "Name of the output array. Defaults to the input file base name."
+          },
+          {
+            "shortFlag": "",
+            "longFlag": "--version",
+            "type": "",
+            "defaultValue": "",
+            "required": false,
+            "description": "Show the version and exit."
+          },
+          {
+            "shortFlag": "-h",
+            "longFlag": "--help",
+            "type": "",
+            "defaultValue": "",
+            "required": false,
+            "description": "Show the help and exit."
+          }
+        ]
+      },
+      {
+        "toolType": "compress",
+        "targetChip": "Both",
+        "toolName": "compress (Legaxy)",
+        "descriptionShort": "Compress/decompress assets",
+        "command": "eab_tools.exe  compress",
+        "commandName": "compress",
+        "chipGen": null,
+        "arguments": [
+          {
+            "shortFlag": "-a",
+            "longFlag": "--compress-lib",
+            "type": "choice[zlib|zopfli]",
+            "defaultValue": "zlib",
+            "required": false,
+            "description": "Select compressor library"
+          },
+          {
+            "shortFlag": "-l",
+            "longFlag": "--compress-level",
+            "type": "IntRange(0-9)",
+            "defaultValue": "6",
+            "required": false,
+            "description": "Compression level from 0 to 9 [0<=x<=9]"
+          },
+          {
+            "shortFlag": "-o",
+            "longFlag": "--output-dir",
+            "type": "path",
+            "defaultValue": "",
+            "required": false,
+            "description": "Specify the output folder path. Optional when validating only"
+          },
+          {
+            "shortFlag": "-n",
+            "longFlag": "--name",
+            "type": "string",
+            "defaultValue": "",
+            "required": false,
+            "description": "Set output file name"
+          },
+          {
+            "shortFlag": "-v",
+            "longFlag": "--validate",
+            "type": "flag",
+            "defaultValue": "",
+            "required": false,
+            "description": "Validate the compressed files"
+          },
+          {
+            "shortFlag": "-d",
+            "longFlag": "--decompress",
+            "type": "flag",
+            "defaultValue": "",
+            "required": false,
+            "description": "Decompress if input files are validated"
+          },
+          {
+            "shortFlag": "-i",
+            "longFlag": "--inputs",
+            "type": "string",
+            "defaultValue": "",
+            "required": true,
+            "description": "List of asset files separated by semicolon [required]"
+          },
+          {
+            "shortFlag": "-p",
+            "longFlag": "--pad-64",
+            "type": "flag",
+            "defaultValue": "",
+            "required": false,
+            "description": "Align input file size to 64-byte boundary"
+          },
+          {
+            "shortFlag": "",
+            "longFlag": "--version",
+            "type": "",
+            "defaultValue": "",
+            "required": false,
+            "description": "Show the version and exit"
+          },
+          {
+            "shortFlag": "-h",
+            "longFlag": "--help",
+            "type": "",
+            "defaultValue": "",
+            "required": false,
+            "description": "Show the help and exit."
+          }
+        ]
+      },
+      {
+        "toolType": "disassembler",
+        "targetChip": "BT82X",
+        "toolName": "disassembler for BT82X",
+        "descriptionShort": "Disassemble EVE commands",
+        "command": "eab_tools.exe 82x disassembler",
+        "commandName": "disassembler",
+        "chipGen": "82x",
+        "arguments": [
+          {
+            "shortFlag": "-i",
+            "longFlag": "--input",
+            "type": "path(exists)",
+            "defaultValue": "",
+            "required": true,
+            "description": "Input file to disassemble. [required]"
+          },
+          {
+            "shortFlag": "-o",
+            "longFlag": "--output-dir",
+            "type": "path",
+            "defaultValue": "",
+            "required": true,
+            "description": "Output folder. [required]"
+          },
+          {
+            "shortFlag": "-d",
+            "longFlag": "--detail",
+            "type": "flag",
+            "defaultValue": "",
+            "required": false,
+            "description": "Set detailed output format."
+          },
+          {
+            "shortFlag": "",
+            "longFlag": "--version",
+            "type": "",
+            "defaultValue": "",
+            "required": false,
+            "description": "Show the version and exit."
+          },
+          {
+            "shortFlag": "-h",
+            "longFlag": "--help",
+            "type": "",
+            "defaultValue": "",
+            "required": false,
+            "description": "Show the help and exit."
+          }
+        ]
+      },
+      {
+        "toolType": "disassembler",
+        "targetChip": "Pre-BT82X",
+        "toolName": "disassembler for Previous EVE chip",
+        "descriptionShort": "",
+        "command": "eab_tools.exe pre82x disassembler",
+        "commandName": "disassembler",
+        "chipGen": "pre82x",
+        "arguments": [
+          {
+            "shortFlag": "-i",
+            "longFlag": "--input-file",
+            "type": "path(exists)",
+            "defaultValue": "",
+            "required": true,
+            "description": "Input file to disassemble. [required]"
+          },
+          {
+            "shortFlag": "-o",
+            "longFlag": "--output-dir",
+            "type": "path",
+            "defaultValue": "",
+            "required": true,
+            "description": "Output folder. [required]"
+          },
+          {
+            "shortFlag": "-c",
+            "longFlag": "--chip",
+            "type": "string",
+            "defaultValue": "BT81X",
+            "required": false,
+            "description": "Set EVE chip: BT81X, FT81X, or FT80X. [default: BT81X]"
+          },
+          {
+            "shortFlag": "-d",
+            "longFlag": "--detail",
+            "type": "flag",
+            "defaultValue": "",
+            "required": false,
+            "description": "Set detailed output format."
+          },
+          {
+            "shortFlag": "",
+            "longFlag": "--version",
+            "type": "",
+            "defaultValue": "",
+            "required": false,
+            "description": "Show the version and exit."
+          },
+          {
+            "shortFlag": "-h",
+            "longFlag": "--help",
+            "type": "",
+            "defaultValue": "",
+            "required": false,
+            "description": "Show the help and exit."
+          }
+        ]
+      },
+      {
+        "toolType": "flash_gen",
+        "targetChip": "BT82X",
+        "toolName": "flash_gen for BT82X",
+        "descriptionShort": "Build flash image",
+        "command": "eab_tools.exe 82x flash_gen",
+        "commandName": "flash_gen",
+        "chipGen": "82x",
+        "arguments": [
+          {
+            "shortFlag": "(arg)",
+            "longFlag": "input_files",
+            "type": "path (multiple)",
+            "defaultValue": "",
+            "required": false,
+            "description": "Input asset files (positional; multiple allowed)"
+          },
+          {
+            "shortFlag": "-o",
+            "longFlag": "--output-dir",
+            "type": "path",
+            "defaultValue": "",
+            "required": true,
+            "description": "Set output folder [required]"
+          },
+          {
+            "shortFlag": "-n",
+            "longFlag": "--output-name",
+            "type": "string",
+            "defaultValue": "flash",
+            "required": false,
+            "description": "Set output name (default: flash)"
+          },
+          {
+            "shortFlag": "-b",
+            "longFlag": "--blob",
+            "type": "path",
+            "defaultValue": "",
+            "required": false,
+            "description": "Set blob file"
+          },
+          {
+            "shortFlag": "-d",
+            "longFlag": "--gen-edf",
+            "type": "flag",
+            "defaultValue": "",
+            "required": false,
+            "description": "Generate EDF block"
+          },
+          {
+            "shortFlag": "-k",
+            "longFlag": "--no-align",
+            "type": "flag",
+            "defaultValue": "",
+            "required": false,
+            "description": "Disable alignment"
+          },
+          {
+            "shortFlag": "-I",
+            "longFlag": "--input-list",
+            "type": "path",
+            "defaultValue": "",
+            "required": false,
+            "description": "Path to a text file listing all input files"
+          },
+          {
+            "shortFlag": "-g",
+            "longFlag": "--gen-source",
+            "type": "string",
+            "defaultValue": "FT4222",
+            "required": false,
+            "description": "Generator source: FT4222 or MPSSE."
+          },
+          {
+            "shortFlag": "",
+            "longFlag": "--version",
+            "type": "",
+            "defaultValue": "",
+            "required": false,
+            "description": "Show the version and exit."
+          },
+          {
+            "shortFlag": "-h",
+            "longFlag": "--help",
+            "type": "",
+            "defaultValue": "",
+            "required": false,
+            "description": "Show the help and exit."
+          }
+        ]
+      },
+      {
+        "toolType": "flash_gen",
+        "targetChip": "Pre-BT82X",
+        "toolName": "flash_gen for Previous EVE chip",
+        "descriptionShort": "",
+        "command": "eab_tools.exe pre82x flash_gen",
+        "commandName": "flash_gen",
+        "chipGen": "pre82x",
+        "arguments": [
+          {
+            "shortFlag": "(arg)",
+            "longFlag": "input_files",
+            "type": "path (multiple)",
+            "defaultValue": "",
+            "required": false,
+            "description": "Input asset files (positional; multiple allowed)"
+          },
+          {
+            "shortFlag": "-o",
+            "longFlag": "--output-dir",
+            "type": "path",
+            "defaultValue": "",
+            "required": true,
+            "description": "Set output folder [required]"
+          },
+          {
+            "shortFlag": "-n",
+            "longFlag": "--output-name",
+            "type": "string",
+            "defaultValue": "flash",
+            "required": false,
+            "description": "Set output name (default: flash)"
+          },
+          {
+            "shortFlag": "-b",
+            "longFlag": "--blob",
+            "type": "path",
+            "defaultValue": "",
+            "required": false,
+            "description": "Set blob file"
+          },
+          {
+            "shortFlag": "-d",
+            "longFlag": "--gen-edf",
+            "type": "flag",
+            "defaultValue": "",
+            "required": false,
+            "description": "Generate EDF block"
+          },
+          {
+            "shortFlag": "-k",
+            "longFlag": "--no-align",
+            "type": "flag",
+            "defaultValue": "",
+            "required": false,
+            "description": "Disable alignment"
+          },
+          {
+            "shortFlag": "-I",
+            "longFlag": "--input-list",
+            "type": "path",
+            "defaultValue": "",
+            "required": false,
+            "description": "Path to a text file listing all input files"
+          },
+          {
+            "shortFlag": "",
+            "longFlag": "--version",
+            "type": "",
+            "defaultValue": "",
+            "required": false,
+            "description": "Show the version and exit."
+          },
+          {
+            "shortFlag": "-h",
+            "longFlag": "--help",
+            "type": "",
+            "defaultValue": "",
+            "required": false,
+            "description": "Show the help and exit."
+          }
+        ]
+      },
+      {
+        "toolType": "flash_prog",
+        "targetChip": "BT82X",
+        "toolName": "flash_prog for BT82X",
+        "descriptionShort": "Program SPI flash",
+        "command": "eab_tools.exe 82x flash_prog",
+        "commandName": "flash_prog",
+        "chipGen": "82x",
+        "arguments": [
+          {
+            "shortFlag": "",
+            "longFlag": "--module",
+            "type": "choice[FT4222|MPSSE]",
+            "defaultValue": "FT4222",
+            "required": false,
+            "description": "SPI programmer module"
+          },
+          {
+            "shortFlag": "",
+            "longFlag": "--frequency",
+            "type": "int",
+            "defaultValue": "12",
+            "required": false,
+            "description": "SPI clock frequency in MHz (1-30)"
+          },
+          {
+            "shortFlag": "",
+            "longFlag": "--detect",
+            "type": "choice[all|safe]",
+            "defaultValue": "",
+            "required": false,
+            "description": "Detect flash chip (safe = no write)"
+          },
+          {
+            "shortFlag": "",
+            "longFlag": "--check-type",
+            "type": "flag",
+            "defaultValue": "",
+            "required": false,
+            "description": "Check flash chip type (NOR / NAND)"
+          },
+          {
+            "shortFlag": "",
+            "longFlag": "--erase",
+            "type": "flag",
+            "defaultValue": "",
+            "required": false,
+            "description": "Erase entire flash chip"
+          },
+          {
+            "shortFlag": "",
+            "longFlag": "--update",
+            "type": "path(exists)",
+            "defaultValue": "",
+            "required": false,
+            "description": "Update file to flash (erase then write)"
+          },
+          {
+            "shortFlag": "",
+            "longFlag": "--update-verify",
+            "type": "path(exists)",
+            "defaultValue": "",
+            "required": false,
+            "description": "Update flash then verify"
+          },
+          {
+            "shortFlag": "",
+            "longFlag": "--program",
+            "type": "path(exists)",
+            "defaultValue": "",
+            "required": false,
+            "description": "Program file onto factory-state flash"
+          },
+          {
+            "shortFlag": "",
+            "longFlag": "--verify",
+            "type": "path(exists)",
+            "defaultValue": "",
+            "required": false,
+            "description": "Compare flash content with file"
+          },
+          {
+            "shortFlag": "",
+            "longFlag": "--read",
+            "type": "path",
+            "defaultValue": "",
+            "required": false,
+            "description": "Dump flash content to file"
+          },
+          {
+            "shortFlag": "",
+            "longFlag": "--readinfo",
+            "type": "flag",
+            "defaultValue": "",
+            "required": false,
+            "description": "Retrieve flash chip information"
+          },
+          {
+            "shortFlag": "",
+            "longFlag": "--readsfdp",
+            "type": "flag",
+            "defaultValue": "",
+            "required": false,
+            "description": "Read SFDP block"
+          },
+          {
+            "shortFlag": "",
+            "longFlag": "--tx",
+            "type": "string",
+            "defaultValue": "",
+            "required": false,
+            "description": "Send raw flash command"
+          },
+          {
+            "shortFlag": "",
+            "longFlag": "--rx",
+            "type": "int",
+            "defaultValue": "1",
+            "required": false,
+            "description": "Expected response length for --tx command"
+          },
+          {
+            "shortFlag": "",
+            "longFlag": "--write-nand",
+            "type": "path(exists)",
+            "defaultValue": "",
+            "required": false,
+            "description": "Write file to NAND flash"
+          },
+          {
+            "shortFlag": "",
+            "longFlag": "--scan-nand",
+            "type": "flag",
+            "defaultValue": "",
+            "required": false,
+            "description": "Scan NAND flash for bad blocks"
+          },
+          {
+            "shortFlag": "",
+            "longFlag": "--sanitize-nand",
+            "type": "flag",
+            "defaultValue": "",
+            "required": false,
+            "description": "Sanitize NAND flash bad blocks"
+          },
+          {
+            "shortFlag": "",
+            "longFlag": "--map-nand",
+            "type": "int int",
+            "defaultValue": "",
+            "required": false,
+            "description": "Map bad block to good block"
+          },
+          {
+            "shortFlag": "",
+            "longFlag": "--offset",
+            "type": "int",
+            "defaultValue": "",
+            "required": false,
+            "description": "Start offset address"
+          },
+          {
+            "shortFlag": "",
+            "longFlag": "--length",
+            "type": "string",
+            "defaultValue": "",
+            "required": false,
+            "description": "Read length (4096-byte aligned or end)"
+          },
+          {
+            "shortFlag": "",
+            "longFlag": "--verbose",
+            "type": "flag",
+            "defaultValue": "False",
+            "required": false,
+            "description": "Print additional messages"
+          },
+          {
+            "shortFlag": "",
+            "longFlag": "--version",
+            "type": "",
+            "defaultValue": "",
+            "required": false,
+            "description": "Show the version and exit"
+          },
+          {
+            "shortFlag": "-h",
+            "longFlag": "--help",
+            "type": "",
+            "defaultValue": "",
+            "required": false,
+            "description": "Show the help and exit."
+          }
+        ]
+      },
+      {
+        "toolType": "flash_prog",
+        "targetChip": "Pre-BT82X",
+        "toolName": "flash_prog for Previous EVE chip",
+        "descriptionShort": "",
+        "command": "eab_tools.exe pre82x flash_prog",
+        "commandName": "flash_prog",
+        "chipGen": "pre82x",
+        "arguments": [
+          {
+            "shortFlag": "",
+            "longFlag": "--module",
+            "type": "choice[FT4222|MPSSE]",
+            "defaultValue": "FT4222",
+            "required": false,
+            "description": "SPI programmer module"
+          },
+          {
+            "shortFlag": "",
+            "longFlag": "--frequency",
+            "type": "int",
+            "defaultValue": "12",
+            "required": false,
+            "description": "SPI clock frequency in MHz (1-30)"
+          },
+          {
+            "shortFlag": "-c",
+            "longFlag": "--chip",
+            "type": "choice[BT815/6|BT817/8]",
+            "defaultValue": "BT815/6",
+            "required": false,
+            "description": "chip [BT815/6|BT817/8] EVE chip generation."
+          },
+          {
+            "shortFlag": "",
+            "longFlag": "--detect",
+            "type": "choice[all|safe]",
+            "defaultValue": "",
+            "required": false,
+            "description": "Detect flash chip (safe = no write)"
+          },
+          {
+            "shortFlag": "",
+            "longFlag": "--erase",
+            "type": "flag",
+            "defaultValue": "",
+            "required": false,
+            "description": "Erase entire flash chip"
+          },
+          {
+            "shortFlag": "",
+            "longFlag": "--newblob",
+            "type": "path(exists)",
+            "defaultValue": "",
+            "required": false,
+            "description": "Write blob file into flash"
+          },
+          {
+            "shortFlag": "",
+            "longFlag": "--update",
+            "type": "path(exists)",
+            "defaultValue": "",
+            "required": false,
+            "description": "Write file to flash (erase then write)"
+          },
+          {
+            "shortFlag": "",
+            "longFlag": "--update-verify",
+            "type": "path(exists)",
+            "defaultValue": "",
+            "required": false,
+            "description": "Write file to flash and verify"
+          },
+          {
+            "shortFlag": "",
+            "longFlag": "--program",
+            "type": "path(exists)",
+            "defaultValue": "",
+            "required": false,
+            "description": "Program file to factory-state flash"
+          },
+          {
+            "shortFlag": "",
+            "longFlag": "--read",
+            "type": "path",
+            "defaultValue": "",
+            "required": false,
+            "description": "Dump flash content to file"
+          },
+          {
+            "shortFlag": "",
+            "longFlag": "--verify",
+            "type": "path(exists)",
+            "defaultValue": "",
+            "required": false,
+            "description": "Verify flash content against file"
+          },
+          {
+            "shortFlag": "",
+            "longFlag": "--readinfo",
+            "type": "flag",
+            "defaultValue": "",
+            "required": false,
+            "description": "Read flash chip information"
+          },
+          {
+            "shortFlag": "",
+            "longFlag": "--readsfdp",
+            "type": "flag",
+            "defaultValue": "",
+            "required": false,
+            "description": "Read SFDP block"
+          },
+          {
+            "shortFlag": "",
+            "longFlag": "--tx",
+            "type": "string",
+            "defaultValue": "",
+            "required": false,
+            "description": "Send raw flash command"
+          },
+          {
+            "shortFlag": "",
+            "longFlag": "--rx",
+            "type": "int",
+            "defaultValue": "1",
+            "required": false,
+            "description": "Expected response length for --tx command"
+          },
+          {
+            "shortFlag": "",
+            "longFlag": "--offset",
+            "type": "int",
+            "defaultValue": "",
+            "required": false,
+            "description": "Start offset address"
+          },
+          {
+            "shortFlag": "",
+            "longFlag": "--length",
+            "type": "string",
+            "defaultValue": "",
+            "required": false,
+            "description": "Read length (4096-byte aligned or end)"
+          },
+          {
+            "shortFlag": "",
+            "longFlag": "--chip-id",
+            "type": "flag",
+            "defaultValue": "",
+            "required": false,
+            "description": "Read chip ID"
+          },
+          {
+            "shortFlag": "",
+            "longFlag": "--version",
+            "type": "",
+            "defaultValue": "",
+            "required": false,
+            "description": "Show the version and exit"
+          },
+          {
+            "shortFlag": "-h",
+            "longFlag": "--help",
+            "type": "",
+            "defaultValue": "",
+            "required": false,
+            "description": "Show the help and exit."
+          }
+        ]
+      },
+      {
+        "toolType": "font",
+        "targetChip": "BT82X",
+        "toolName": "font for BT82X",
+        "descriptionShort": "Convert EVE fonts",
+        "command": "eab_tools.exe 82x font",
+        "commandName": "font",
+        "chipGen": "82x",
+        "arguments": [
+          {
+            "shortFlag": "-f",
+            "longFlag": "--font-struct",
+            "type": "choice[legacy|ext1|ext2]",
+            "defaultValue": "legacy",
+            "required": false,
+            "description": "Font structure."
+          },
+          {
+            "shortFlag": "-i",
+            "longFlag": "--infile",
+            "type": "path",
+            "defaultValue": "",
+            "required": false,
+            "description": "Input font file."
+          },
+          {
+            "shortFlag": "-r",
+            "longFlag": "--input-range",
+            "type": "string",
+            "defaultValue": "",
+            "required": false,
+            "description": "Input character range (e.g., U+0000-U+007F)."
+          },
+          {
+            "shortFlag": "-u",
+            "longFlag": "--utf8-file",
+            "type": "path",
+            "defaultValue": "",
+            "required": false,
+            "description": "file PATH UTF-8 file to convert."
+          },
+          {
+            "shortFlag": "-o",
+            "longFlag": "--output-dir",
+            "type": "path",
+            "defaultValue": "",
+            "required": false,
+            "description": "Output directory."
+          },
+          {
+            "shortFlag": "-s",
+            "longFlag": "--point-size",
+            "type": "int",
+            "defaultValue": "25",
+            "required": false,
+            "description": "Font point size."
+          },
+          {
+            "shortFlag": "-D",
+            "longFlag": "--dpi",
+            "type": "int",
+            "defaultValue": "72",
+            "required": false,
+            "description": "setting."
+          },
+          {
+            "shortFlag": "-l",
+            "longFlag": "--first-character",
+            "type": "int",
+            "defaultValue": "1",
+            "required": false,
+            "description": "First character code."
+          },
+          {
+            "shortFlag": "-d",
+            "longFlag": "--address",
+            "type": "int",
+            "defaultValue": "0",
+            "required": false,
+            "description": "Start address."
+          },
+          {
+            "shortFlag": "-m",
+            "longFlag": "--symbol",
+            "type": "flag",
+            "defaultValue": "",
+            "required": false,
+            "description": "Symbol font encoding."
+          },
+          {
+            "shortFlag": "-B",
+            "longFlag": "--flag-bin",
+            "type": "flag",
+            "defaultValue": "",
+            "required": false,
+            "description": "Binary output flag."
+          },
+          {
+            "shortFlag": "-W",
+            "longFlag": "--flag-cjk",
+            "type": "flag",
+            "defaultValue": "",
+            "required": false,
+            "description": "Flag for CJK fonts."
+          },
+          {
+            "shortFlag": "-R",
+            "longFlag": "--relocate",
+            "type": "flag",
+            "defaultValue": "",
+            "required": false,
+            "description": "Relocate font."
+          },
+          {
+            "shortFlag": "-S",
+            "longFlag": "--add-space",
+            "type": "flag",
+            "defaultValue": "False",
+            "required": false,
+            "description": "Assign the space character to code point 0x20."
+          },
+          {
+            "shortFlag": "-p",
+            "longFlag": "--gen-preview",
+            "type": "flag",
+            "defaultValue": "",
+            "required": false,
+            "description": "Generate preview."
+          },
+          {
+            "shortFlag": "-g",
+            "longFlag": "--gen-source",
+            "type": "string",
+            "defaultValue": "",
+            "required": false,
+            "description": "Generator source: FT4222 or MPSSE."
+          },
+          {
+            "shortFlag": "-E",
+            "longFlag": "--bitmap-format",
+            "type": "string",
+            "defaultValue": "L4",
+            "required": false,
+            "description": "Bitmap format: ASTC, L1, L2, L4, L8."
+          },
+          {
+            "shortFlag": "-b",
+            "longFlag": "--astc-block",
+            "type": "string",
+            "defaultValue": "auto",
+            "required": false,
+            "description": "block TEXT ASTC block footprint."
+          },
+          {
+            "shortFlag": "-e",
+            "longFlag": "--astc-effort",
+            "type": "choice[thorough|exhaustive|medium|fast|fastest]",
+            "defaultValue": "fast",
+            "required": false,
+            "description": "effort: thorough, exhaustive, medium, fast, fastest."
+          },
+          {
+            "shortFlag": "-K",
+            "longFlag": "--extended-kerning",
+            "type": "flag",
+            "defaultValue": "",
+            "required": false,
+            "description": "Enable extended kerning."
+          },
+          {
+            "shortFlag": "-L",
+            "longFlag": "--ordinal-mode",
+            "type": "flag",
+            "defaultValue": "",
+            "required": false,
+            "description": "Ordinal mode."
+          },
+          {
+            "shortFlag": "-x",
+            "longFlag": "--astc-path",
+            "type": "path",
+            "defaultValue": "",
+            "required": false,
+            "description": "Path to astcenc encoder."
+          },
+          {
+            "shortFlag": "",
+            "longFlag": "--version",
+            "type": "",
+            "defaultValue": "",
+            "required": false,
+            "description": "Show the version and exit."
+          },
+          {
+            "shortFlag": "-h",
+            "longFlag": "--help",
+            "type": "",
+            "defaultValue": "",
+            "required": false,
+            "description": "Show the help and exit."
+          }
+        ]
+      },
+      {
+        "toolType": "font",
+        "targetChip": "Pre-BT82X",
+        "toolName": "font for Previous EVE chip",
+        "descriptionShort": "",
+        "command": "eab_tools.exe pre82x font",
+        "commandName": "font",
+        "chipGen": "pre82x",
+        "arguments": [
+          {
+            "shortFlag": "-f",
+            "longFlag": "--font-struct",
+            "type": "choice[legacy|ext]",
+            "defaultValue": "legacy",
+            "required": false,
+            "description": "Font structure."
+          },
+          {
+            "shortFlag": "-i",
+            "longFlag": "--infile",
+            "type": "path(exists)",
+            "defaultValue": "",
+            "required": false,
+            "description": "Input font file."
+          },
+          {
+            "shortFlag": "-u",
+            "longFlag": "--utf8-file",
+            "type": "path",
+            "defaultValue": "",
+            "required": false,
+            "description": "file PATH UTF-8 file to convert."
+          },
+          {
+            "shortFlag": "-r",
+            "longFlag": "--input-ranges",
+            "type": "string",
+            "defaultValue": "",
+            "required": false,
+            "description": "Character range: U+xxxx-U+xxxx."
+          },
+          {
+            "shortFlag": "-o",
+            "longFlag": "--output-dir",
+            "type": "path",
+            "defaultValue": "",
+            "required": false,
+            "description": "Output directory."
+          },
+          {
+            "shortFlag": "-s",
+            "longFlag": "--point-size",
+            "type": "int",
+            "defaultValue": "20",
+            "required": false,
+            "description": "Font point size."
+          },
+          {
+            "shortFlag": "-D",
+            "longFlag": "--dpi",
+            "type": "int",
+            "defaultValue": "72",
+            "required": false,
+            "description": "DPI setting"
+          },
+          {
+            "shortFlag": "-l",
+            "longFlag": "--first-character",
+            "type": "int",
+            "defaultValue": "1",
+            "required": false,
+            "description": "First character code."
+          },
+          {
+            "shortFlag": "-d",
+            "longFlag": "--address",
+            "type": "int",
+            "defaultValue": "0",
+            "required": false,
+            "description": "Start address."
+          },
+          {
+            "shortFlag": "-c",
+            "longFlag": "--command",
+            "type": "choice[setfont|setfont2]",
+            "defaultValue": "setfont2",
+            "required": false,
+            "description": "Coprocessor command."
+          },
+          {
+            "shortFlag": "-m",
+            "longFlag": "--symbol",
+            "type": "flag",
+            "defaultValue": "",
+            "required": false,
+            "description": "Symbol font encoding."
+          },
+          {
+            "shortFlag": "-E",
+            "longFlag": "--bitmap-format",
+            "type": "string",
+            "defaultValue": "L4",
+            "required": false,
+            "description": "Bitmap format: ASTC, L1, L2, L4, L8."
+          },
+          {
+            "shortFlag": "-S",
+            "longFlag": "--add-space",
+            "type": "flag",
+            "defaultValue": "False",
+            "required": false,
+            "description": "Assign the space character to code point 0x20."
+          },
+          {
+            "shortFlag": "-N",
+            "longFlag": "--bt817-escape-line-feed",
+            "type": "flag",
+            "defaultValue": "",
+            "required": false,
+            "description": "Escape line feed for BT817."
+          },
+          {
+            "shortFlag": "-p",
+            "longFlag": "--gen-preview",
+            "type": "flag",
+            "defaultValue": "",
+            "required": false,
+            "description": "Generate preview."
+          },
+          {
+            "shortFlag": "-g",
+            "longFlag": "--gen-source",
+            "type": "flag",
+            "defaultValue": "",
+            "required": false,
+            "description": "Generator source: FT4222 or MPSSE."
+          },
+          {
+            "shortFlag": "-b",
+            "longFlag": "--astc-block",
+            "type": "string",
+            "defaultValue": "auto",
+            "required": false,
+            "description": "block TEXT ASTC block footprint."
+          },
+          {
+            "shortFlag": "-e",
+            "longFlag": "--astc-effort",
+            "type": "choice[thorough|exhaustive|medium|fast|fastest]",
+            "defaultValue": "fast",
+            "required": false,
+            "description": "effort: thorough, exhaustive, medium, fast, fastest."
+          },
+          {
+            "shortFlag": "-x",
+            "longFlag": "--astc-encoder",
+            "type": "path",
+            "defaultValue": "astcenc.exe",
+            "required": false,
+            "description": "Path to ASTC encoder (ext only)"
+          },
+          {
+            "shortFlag": "-L",
+            "longFlag": "--ordinal-mode",
+            "type": "flag",
+            "defaultValue": "",
+            "required": false,
+            "description": "Ordinal mode."
+          },
+          {
+            "shortFlag": "-R",
+            "longFlag": "--ram-address",
+            "type": "flag",
+            "defaultValue": "",
+            "required": false,
+            "description": "Use RAM address."
+          },
+          {
+            "shortFlag": "",
+            "longFlag": "--version",
+            "type": "",
+            "defaultValue": "",
+            "required": false,
+            "description": "Show the version and exit."
+          },
+          {
+            "shortFlag": "-h",
+            "longFlag": "--help",
+            "type": "",
+            "defaultValue": "",
+            "required": false,
+            "description": "Show the help and exit."
+          }
+        ]
+      },
+      {
+        "toolType": "font_encode",
+        "targetChip": "BT82X",
+        "toolName": "font_encode for BT82X",
+        "descriptionShort": "Encode text by font map",
+        "command": "eab_tools.exe 82x font_encode",
+        "commandName": "font_encode",
+        "chipGen": "82x",
+        "arguments": [
+          {
+            "shortFlag": "-i",
+            "longFlag": "--input",
+            "type": "string",
+            "defaultValue": "",
+            "required": true,
+            "description": "Text or path to UTF-8 text file to convert. [required]"
+          },
+          {
+            "shortFlag": "-j",
+            "longFlag": "--json",
+            "type": "path(exists)",
+            "defaultValue": "",
+            "required": true,
+            "description": "Path to json file from fnt_cvt. [required]"
+          },
+          {
+            "shortFlag": "-u",
+            "longFlag": "--unknown-text",
+            "type": "string",
+            "defaultValue": "",
+            "required": false,
+            "description": "Text to replace unknown characters (max 16 characters)."
+          },
+          {
+            "shortFlag": "-o",
+            "longFlag": "--output-dir",
+            "type": "path",
+            "defaultValue": "",
+            "required": false,
+            "description": "Output folder (optional)."
+          },
+          {
+            "shortFlag": "",
+            "longFlag": "--version",
+            "type": "",
+            "defaultValue": "",
+            "required": false,
+            "description": "Show the version and exit."
+          },
+          {
+            "shortFlag": "-h",
+            "longFlag": "--help",
+            "type": "",
+            "defaultValue": "",
+            "required": false,
+            "description": "Show the help and exit."
+          }
+        ]
+      },
+      {
+        "toolType": "font_info",
+        "targetChip": "Both",
+        "toolName": "font_info (Legaxy)",
+        "descriptionShort": "Read font information",
+        "command": "eab_tools.exe  font_info",
+        "commandName": "font_info",
+        "chipGen": null,
+        "arguments": [
+          {
+            "shortFlag": "-i",
+            "longFlag": "--input-font",
+            "type": "path(exists)",
+            "defaultValue": "",
+            "required": false,
+            "description": "Input font file path [required]"
+          },
+          {
+            "shortFlag": "-o",
+            "longFlag": "--output-dir",
+            "type": "path",
+            "defaultValue": "",
+            "required": false,
+            "description": "Output folder"
+          },
+          {
+            "shortFlag": "-j",
+            "longFlag": "--json",
+            "type": "flag",
+            "defaultValue": "",
+            "required": false,
+            "description": "Output in JSON format"
+          },
+          {
+            "shortFlag": "",
+            "longFlag": "--version",
+            "type": "",
+            "defaultValue": "",
+            "required": false,
+            "description": "Show the version and exit."
+          },
+          {
+            "shortFlag": "-h",
+            "longFlag": "--help",
+            "type": "",
+            "defaultValue": "",
+            "required": false,
+            "description": "Show help and exit."
+          }
+        ]
+      },
+      {
+        "toolType": "fwtouch",
+        "targetChip": "Pre-BT82X",
+        "toolName": "fwtouch for Previous EVE chip",
+        "descriptionShort": "Customize touch firmware",
+        "command": "eab_tools.exe pre82x fwtouch",
+        "commandName": "fwtouch",
+        "chipGen": "pre82x",
+        "arguments": [
+          {
+            "shortFlag": "-i",
+            "longFlag": "--input",
+            "type": "path(exists)",
+            "defaultValue": "",
+            "required": true,
+            "description": "Set input C source file [required]"
+          },
+          {
+            "shortFlag": "-o",
+            "longFlag": "--output",
+            "type": "path",
+            "defaultValue": "",
+            "required": true,
+            "description": "Set output folder [required]"
+          },
+          {
+            "shortFlag": "-c",
+            "longFlag": "--eve-chip",
+            "type": "string",
+            "defaultValue": "BT81X",
+            "required": false,
+            "description": "Chip select [default: BT81X]"
+          },
+          {
+            "shortFlag": "",
+            "longFlag": "--version",
+            "type": "",
+            "defaultValue": "",
+            "required": false,
+            "description": "Show the version and exit."
+          },
+          {
+            "shortFlag": "-h",
+            "longFlag": "--help",
+            "type": "",
+            "defaultValue": "",
+            "required": false,
+            "description": "Show the help and exit."
+          }
+        ]
+      },
+      {
+        "toolType": "img_cvt",
+        "targetChip": "BT82X",
+        "toolName": "img_cvt for BT82X",
+        "descriptionShort": "Convert images",
+        "command": "eab_tools.exe 82x img_cvt",
+        "commandName": "img_cvt",
+        "chipGen": "82x",
+        "arguments": [
+          {
+            "shortFlag": "-i",
+            "longFlag": "--input",
+            "type": "path(exists)",
+            "defaultValue": "",
+            "required": true,
+            "description": "Set input file [required]"
+          },
+          {
+            "shortFlag": "-o",
+            "longFlag": "--output-dir",
+            "type": "path",
+            "defaultValue": "",
+            "required": true,
+            "description": "Set output folder [required]"
+          },
+          {
+            "shortFlag": "-n",
+            "longFlag": "--output-name",
+            "type": "string",
+            "defaultValue": "",
+            "required": false,
+            "description": "Set asset name (no extension)"
+          },
+          {
+            "shortFlag": "-f",
+            "longFlag": "--format",
+            "type": "string",
+            "defaultValue": "",
+            "required": true,
+            "description": "Set output format (e.g. ASTC_5x5, YCBCR, LA8, etc.) YCBCR, ASTC_4x4, 5x4, 5x5, 6x5, 6x6, 8x5, 8x6, 8x8, 10x5, 10x6, 10x8, 10x10, 12x10, 12x12 ARGB8, ARGB6, RGB8, RGB6, PALETTEDARGB8, LA8, LA4, LA2, LA1 [required]"
+          },
+          {
+            "shortFlag": "-d",
+            "longFlag": "--dither-algo",
+            "type": "DitherAlgoType",
+            "defaultValue": "FLOYD_STEINBERG",
+            "required": false,
+            "description": "Dithering algorithm (partial name accepted, e.g. \"ostro\", \"jjn\", \"bayer4\"): Error Diffusion : FLOYD_STEINBERG, FLOYD_STEINBERG_SERPENTINE, JARVIS_JUDICE_NINKE, STUCKI, ATKINSON, BURKES, SIERRA_3, SIERRA_2, SIERRA_LITE, STEVENSON_ARCE, OSTROMOUKHOV, RIEMERSMA Ordered : BAYER_2x2, BAYER_4x4, BAYER_8x8, VOID_AND_CLUSTER, DISPERSED_DOT, CLUSTERED_DOT, HALFTONE Noise : WHITE_NOISE, BLUE_NOISE Iterative : DBS (slow) None : NONE"
+          },
+          {
+            "shortFlag": "-e",
+            "longFlag": "--astc-effort",
+            "type": "choice[exhaustive|thorough|medium|fast|fastest]",
+            "defaultValue": "fastest",
+            "required": false,
+            "description": "Set ASTC effort level"
+          },
+          {
+            "shortFlag": "-a",
+            "longFlag": "--astc-params",
+            "type": "string",
+            "defaultValue": "",
+            "required": false,
+            "description": "Additional ASTC encoder parameters"
+          },
+          {
+            "shortFlag": "-x",
+            "longFlag": "--astcenc-path",
+            "type": "path",
+            "defaultValue": "astcenc.exe",
+            "required": false,
+            "description": "Path to astcenc.exe"
+          },
+          {
+            "shortFlag": "-m",
+            "longFlag": "--multi-cell-height",
+            "type": "int",
+            "defaultValue": "-1",
+            "required": false,
+            "description": "Height of multi-cell bitmap for ASTC only."
+          },
+          {
+            "shortFlag": "-r",
+            "longFlag": "--alpha-area",
+            "type": "string",
+            "defaultValue": "",
+            "required": false,
+            "description": "format: Set alpha area (left,top,right,bottom)"
+          },
+          {
+            "shortFlag": "-l",
+            "longFlag": "--alpha-value",
+            "type": "int",
+            "defaultValue": "100",
+            "required": false,
+            "description": "format: Set alpha value [default: 100]"
+          },
+          {
+            "shortFlag": "-Z",
+            "longFlag": "--zorder",
+            "type": "IntRange(-1-255)",
+            "defaultValue": "-1",
+            "required": false,
+            "description": "Z-order (Morton code) value (0-255). Default: -1 (disable). [-1<=x<=255]"
+          },
+          {
+            "shortFlag": "-g",
+            "longFlag": "--gen-app",
+            "type": "choice[FT4222|MPSSE]",
+            "defaultValue": "",
+            "required": false,
+            "description": "Generate sample application for FT4222/MPSSE platform"
+          },
+          {
+            "shortFlag": "",
+            "longFlag": "--version",
+            "type": "",
+            "defaultValue": "",
+            "required": false,
+            "description": "Show the version and exit."
+          },
+          {
+            "shortFlag": "-h",
+            "longFlag": "--help",
+            "type": "",
+            "defaultValue": "",
+            "required": false,
+            "description": "Show the help and exit."
+          }
+        ]
+      },
+      {
+        "toolType": "img_cvt",
+        "targetChip": "Pre-BT82X",
+        "toolName": "img_cvt for Previous EVE chip",
+        "descriptionShort": "Convert images",
+        "command": "eab_tools.exe pre82x img_cvt",
+        "commandName": "img_cvt",
+        "chipGen": "pre82x",
+        "arguments": [
+          {
+            "shortFlag": "-i",
+            "longFlag": "--input",
+            "type": "path(exists)",
+            "defaultValue": "",
+            "required": true,
+            "description": "Set input file [required]"
+          },
+          {
+            "shortFlag": "-o",
+            "longFlag": "--output-dir",
+            "type": "path",
+            "defaultValue": "",
+            "required": true,
+            "description": "Set output folder [required]"
+          },
+          {
+            "shortFlag": "-n",
+            "longFlag": "--output-name",
+            "type": "string",
+            "defaultValue": "",
+            "required": false,
+            "description": "Set asset name (no extension)"
+          },
+          {
+            "shortFlag": "-f",
+            "longFlag": "--format",
+            "type": "string",
+            "defaultValue": "",
+            "required": true,
+            "description": "Set output format (e.g. ASTC_5x5, YCBCR, LA8, etc.) YCBCR, ASTC_4x4, 5x4, 5x5, 6x5, 6x6, 8x5, 8x6, 8x8, 10x5, 10x6, 10x8, 10x10, 12x10, 12x12 ARGB8, ARGB6, RGB8, RGB6, PALETTEDARGB8, LA8, LA4, LA2, LA1 [required]"
+          },
+          {
+            "shortFlag": "-d",
+            "longFlag": "--dither-algo",
+            "type": "DitherAlgoType",
+            "defaultValue": "FLOYD_STEINBERG",
+            "required": false,
+            "description": "Dithering algorithm (partial name accepted, e.g. \"ostro\", \"jjn\", \"bayer4\"): Error Diffusion : FLOYD_STEINBERG, FLOYD_STEINBERG_SERPENTINE, JARVIS_JUDICE_NINKE, STUCKI, ATKINSON, BURKES, SIERRA_3, SIERRA_2, SIERRA_LITE, STEVENSON_ARCE, OSTROMOUKHOV, RIEMERSMA Ordered : BAYER_2x2, BAYER_4x4, BAYER_8x8, VOID_AND_CLUSTER, DISPERSED_DOT, CLUSTERED_DOT, HALFTONE Noise : WHITE_NOISE, BLUE_NOISE Iterative : DBS (slow) None : NONE"
+          },
+          {
+            "shortFlag": "-e",
+            "longFlag": "--astc-effort",
+            "type": "choice[exhaustive|thorough|medium|fast|fastest]",
+            "defaultValue": "fastest",
+            "required": false,
+            "description": "Set ASTC effort level"
+          },
+          {
+            "shortFlag": "-a",
+            "longFlag": "--astc-params",
+            "type": "string",
+            "defaultValue": "",
+            "required": false,
+            "description": "Additional ASTC encoder parameters"
+          },
+          {
+            "shortFlag": "-x",
+            "longFlag": "--astcenc-path",
+            "type": "path",
+            "defaultValue": "astcenc.exe",
+            "required": false,
+            "description": "Path to astcenc.exe"
+          },
+          {
+            "shortFlag": "-m",
+            "longFlag": "--multi-cell-height",
+            "type": "int",
+            "defaultValue": "-1",
+            "required": false,
+            "description": "Height of multi-cell bitmap for ASTC only."
+          },
+          {
+            "shortFlag": "-g",
+            "longFlag": "--gen-app",
+            "type": "flag",
+            "defaultValue": "",
+            "required": false,
+            "description": "Generate sample application for FT4222/MPSSE platform"
+          },
+          {
+            "shortFlag": "",
+            "longFlag": "--version",
+            "type": "",
+            "defaultValue": "",
+            "required": false,
+            "description": "Show the version and exit."
+          },
+          {
+            "shortFlag": "-h",
+            "longFlag": "--help",
+            "type": "",
+            "defaultValue": "",
+            "required": false,
+            "description": "Show the help and exit."
+          }
+        ]
+      },
+      {
+        "toolType": "img_val",
+        "targetChip": "BT82X",
+        "toolName": "img_val for BT82X",
+        "descriptionShort": "Validate image compatibility",
+        "command": "eab_tools.exe 82x img_val",
+        "commandName": "img_val",
+        "chipGen": "82x",
+        "arguments": [
+          {
+            "shortFlag": "-i",
+            "longFlag": "--input",
+            "type": "path(exists)",
+            "defaultValue": "",
+            "required": true,
+            "description": "Set input image [required]"
+          },
+          {
+            "shortFlag": "-o",
+            "longFlag": "--output-dir",
+            "type": "path",
+            "defaultValue": "",
+            "required": false,
+            "description": "Set output folder"
+          },
+          {
+            "shortFlag": "-c",
+            "longFlag": "--optimize",
+            "type": "flag",
+            "defaultValue": "",
+            "required": false,
+            "description": "Optimize image before validation"
+          },
+          {
+            "shortFlag": "",
+            "longFlag": "--version",
+            "type": "",
+            "defaultValue": "",
+            "required": false,
+            "description": "Show the version and exit."
+          },
+          {
+            "shortFlag": "-h",
+            "longFlag": "--help",
+            "type": "",
+            "defaultValue": "",
+            "required": false,
+            "description": "Show the help and exit."
+          }
+        ]
+      },
+      {
+        "toolType": "img_val",
+        "targetChip": "Pre-BT82X",
+        "toolName": "img_val for Previous EVE chip",
+        "descriptionShort": "",
+        "command": "eab_tools.exe pre82x img_val",
+        "commandName": "img_val",
+        "chipGen": "pre82x",
+        "arguments": [
+          {
+            "shortFlag": "-i",
+            "longFlag": "--input",
+            "type": "path(exists)",
+            "defaultValue": "",
+            "required": true,
+            "description": "Set input image [required]"
+          },
+          {
+            "shortFlag": "-o",
+            "longFlag": "--output-dir",
+            "type": "path",
+            "defaultValue": "",
+            "required": false,
+            "description": "Set output folder"
+          },
+          {
+            "shortFlag": "-e",
+            "longFlag": "--eve-chip",
+            "type": "string",
+            "defaultValue": "BT81X",
+            "required": false,
+            "description": "Set EVE chip: FT80X, FT81X, BT88X, or BT81X [default: BT81X]"
+          },
+          {
+            "shortFlag": "-c",
+            "longFlag": "--optimize",
+            "type": "flag",
+            "defaultValue": "",
+            "required": false,
+            "description": "Optimize image before validation"
+          },
+          {
+            "shortFlag": "-r",
+            "longFlag": "--resize",
+            "type": "flag",
+            "defaultValue": "",
+            "required": false,
+            "description": "Resize image if needed (only works with -c)"
+          },
+          {
+            "shortFlag": "",
+            "longFlag": "--version",
+            "type": "",
+            "defaultValue": "",
+            "required": false,
+            "description": "Show the version and exit."
+          },
+          {
+            "shortFlag": "-h",
+            "longFlag": "--help",
+            "type": "",
+            "defaultValue": "",
+            "required": false,
+            "description": "Show the help and exit."
+          }
+        ]
+      },
+      {
+        "toolType": "jpeg_optimize",
+        "targetChip": "Pre-BT82X",
+        "toolName": "jpeg_optimize for Previous EVE chip",
+        "descriptionShort": "Optimize JPEG",
+        "command": "eab_tools.exe pre82x jpeg_optimize",
+        "commandName": "jpeg_optimize",
+        "chipGen": "pre82x",
+        "arguments": [
+          {
+            "shortFlag": "-i",
+            "longFlag": "--input",
+            "type": "path(exists)",
+            "defaultValue": "",
+            "required": true,
+            "description": "Input JPEG file [required]"
+          },
+          {
+            "shortFlag": "-o",
+            "longFlag": "--output-dir",
+            "type": "path",
+            "defaultValue": "",
+            "required": false,
+            "description": "Set output folder"
+          },
+          {
+            "shortFlag": "-l",
+            "longFlag": "--gray",
+            "type": "flag",
+            "defaultValue": "",
+            "required": false,
+            "description": "Convert to grayscale"
+          },
+          {
+            "shortFlag": "-p",
+            "longFlag": "--print-console",
+            "type": "flag",
+            "defaultValue": "",
+            "required": false,
+            "description": "Print output to stdout instead of saving"
+          },
+          {
+            "shortFlag": "",
+            "longFlag": "--version",
+            "type": "",
+            "defaultValue": "",
+            "required": false,
+            "description": "Show the version and exit."
+          },
+          {
+            "shortFlag": "-h",
+            "longFlag": "--help",
+            "type": "",
+            "defaultValue": "",
+            "required": false,
+            "description": "Show the help and exit."
+          }
+        ]
+      },
+      {
+        "toolType": "raw_viewer",
+        "targetChip": "BT82X",
+        "toolName": "raw_viewer for BT82X",
+        "descriptionShort": "View RAW image",
+        "command": "eab_tools.exe 82x raw_viewer",
+        "commandName": "raw_viewer",
+        "chipGen": "82x",
+        "arguments": [
+          {
+            "shortFlag": "-i",
+            "longFlag": "--input",
+            "type": "path(exists)",
+            "defaultValue": "",
+            "required": true,
+            "description": "Input raw pixels to visualize [required]"
+          },
+          {
+            "shortFlag": "-l",
+            "longFlag": "--palette",
+            "type": "path(exists)",
+            "defaultValue": "",
+            "required": false,
+            "description": "Input palette LUT file"
+          },
+          {
+            "shortFlag": "-f",
+            "longFlag": "--bitmap-format",
+            "type": "string",
+            "defaultValue": "",
+            "required": true,
+            "description": "Bitmap format of raw pixels (e.g., ARGB1555, L8, PALETTED565...) [required]"
+          },
+          {
+            "shortFlag": "-s",
+            "longFlag": "--bitmap-size",
+            "type": "string",
+            "defaultValue": "",
+            "required": true,
+            "description": "Set bitmap width x height, ex: 150x120 [required]"
+          },
+          {
+            "shortFlag": "-o",
+            "longFlag": "--output-dir",
+            "type": "path",
+            "defaultValue": "",
+            "required": false,
+            "description": "Set output folder to save PNG"
+          },
+          {
+            "shortFlag": "",
+            "longFlag": "--version",
+            "type": "",
+            "defaultValue": "",
+            "required": false,
+            "description": "Show the version and exit"
+          },
+          {
+            "shortFlag": "-h",
+            "longFlag": "--help",
+            "type": "",
+            "defaultValue": "",
+            "required": false,
+            "description": "Show the help and exit."
+          }
+        ]
+      },
+      {
+        "toolType": "video",
+        "targetChip": "BT82X",
+        "toolName": "video for BT82X",
+        "descriptionShort": "Convert video",
+        "command": "eab_tools.exe 82x video",
+        "commandName": "video",
+        "chipGen": "82x",
+        "arguments": [
+          {
+            "shortFlag": "-i",
+            "longFlag": "--input",
+            "type": "path(exists)",
+            "defaultValue": "",
+            "required": true,
+            "description": "Input video file [required]"
+          },
+          {
+            "shortFlag": "-o",
+            "longFlag": "--output-dir",
+            "type": "path",
+            "defaultValue": "",
+            "required": true,
+            "description": "Output folder [required]"
+          },
+          {
+            "shortFlag": "-r",
+            "longFlag": "--resolution",
+            "type": "string",
+            "defaultValue": "1920:1200",
+            "required": false,
+            "description": "Scale format: <width>:<height> [default: 1920:1200]"
+          },
+          {
+            "shortFlag": "-t",
+            "longFlag": "--frame-rate",
+            "type": "float",
+            "defaultValue": "0",
+            "required": false,
+            "description": "Frame rate (fps), use 0 to keep original"
+          },
+          {
+            "shortFlag": "-a",
+            "longFlag": "--avg-bitrate",
+            "type": "string",
+            "defaultValue": "",
+            "required": false,
+            "description": "Average bit rate (optional)"
+          },
+          {
+            "shortFlag": "-m",
+            "longFlag": "--max-bitrate",
+            "type": "string",
+            "defaultValue": "",
+            "required": false,
+            "description": "Max bit rate (optional)"
+          },
+          {
+            "shortFlag": "-b",
+            "longFlag": "--buffer-size",
+            "type": "string",
+            "defaultValue": "",
+            "required": false,
+            "description": "Video buffer size (optional)"
+          },
+          {
+            "shortFlag": "-f",
+            "longFlag": "--audio-format",
+            "type": "choice",
+            "defaultValue": "3",
+            "required": false,
+            "description": "Audio format (0-LINEAR, 1-ULAW, 2-ADPCM, 3-S16, 4-S16S) [default: 3]"
+          },
+          {
+            "shortFlag": "-s",
+            "longFlag": "--sample-rate",
+            "type": "int",
+            "defaultValue": "",
+            "required": false,
+            "description": "Audio sample rate. Use 0 to keep original,"
+          },
+          {
+            "shortFlag": "-c",
+            "longFlag": "--channel",
+            "type": "choice[mix|left|right]",
+            "defaultValue": "",
+            "required": false,
+            "description": "Audio channel"
+          },
+          {
+            "shortFlag": "-p",
+            "longFlag": "--ffmpeg-options",
+            "type": "string",
+            "defaultValue": "",
+            "required": false,
+            "description": "Additional FFMPEG command-line options"
+          },
+          {
+            "shortFlag": "-g",
+            "longFlag": "--gen-app",
+            "type": "choice[FT4222|MPSSE]",
+            "defaultValue": "",
+            "required": false,
+            "description": "Generate sample project for FT4222/MPSSE platform"
+          },
+          {
+            "shortFlag": "",
+            "longFlag": "--version",
+            "type": "",
+            "defaultValue": "",
+            "required": false,
+            "description": "Show the version and exit."
+          },
+          {
+            "shortFlag": "-h",
+            "longFlag": "--help",
+            "type": "",
+            "defaultValue": "",
+            "required": false,
+            "description": "Show the help and exit."
+          }
+        ]
+      },
+      {
+        "toolType": "video",
+        "targetChip": "Pre-BT82X",
+        "toolName": "video for Previous EVE chip",
+        "descriptionShort": "",
+        "command": "eab_tools.exe pre82x video",
+        "commandName": "video",
+        "chipGen": "pre82x",
+        "arguments": [
+          {
+            "shortFlag": "-i",
+            "longFlag": "--input",
+            "type": "path(exists)",
+            "defaultValue": "",
+            "required": true,
+            "description": "Input video file [required]"
+          },
+          {
+            "shortFlag": "-o",
+            "longFlag": "--output-dir",
+            "type": "path(exists)",
+            "defaultValue": "",
+            "required": true,
+            "description": "Output folder [required]"
+          },
+          {
+            "shortFlag": "-r",
+            "longFlag": "--resolution",
+            "type": "string",
+            "defaultValue": "800:480",
+            "required": false,
+            "description": "Scale format: <width>:<height> [default: 1920:1200]"
+          },
+          {
+            "shortFlag": "-t",
+            "longFlag": "--frame-rate",
+            "type": "float",
+            "defaultValue": "0",
+            "required": false,
+            "description": "Frame rate (fps), use 0 to keep original"
+          },
+          {
+            "shortFlag": "-p",
+            "longFlag": "--ffmpeg-options",
+            "type": "string",
+            "defaultValue": "",
+            "required": false,
+            "description": "Additional FFMPEG command-line options"
+          },
+          {
+            "shortFlag": "-a",
+            "longFlag": "--avg-bitrate",
+            "type": "string",
+            "defaultValue": "",
+            "required": false,
+            "description": "Average bit rate (optional)"
+          },
+          {
+            "shortFlag": "-m",
+            "longFlag": "--max-bitrate",
+            "type": "string",
+            "defaultValue": "",
+            "required": false,
+            "description": "Max bit rate (optional)"
+          },
+          {
+            "shortFlag": "-b",
+            "longFlag": "--buffer-size",
+            "type": "string",
+            "defaultValue": "",
+            "required": false,
+            "description": "Video buffer size (optional)"
+          },
+          {
+            "shortFlag": "-s",
+            "longFlag": "--sample-rate",
+            "type": "choice",
+            "defaultValue": "",
+            "required": false,
+            "description": "Audio sample rate. Use 0 to keep original,"
+          },
+          {
+            "shortFlag": "-g",
+            "longFlag": "--gen-src",
+            "type": "flag",
+            "defaultValue": "",
+            "required": false,
+            "description": "Generate sample project"
+          },
+          {
+            "shortFlag": "",
+            "longFlag": "--version",
+            "type": "",
+            "defaultValue": "",
+            "required": false,
+            "description": "Show the version and exit."
+          },
+          {
+            "shortFlag": "-h",
+            "longFlag": "--help",
+            "type": "",
+            "defaultValue": "",
+            "required": false,
+            "description": "Show the help and exit."
+          }
+        ]
+      }
+    ]
+  },
+  "typedTools": {
+    "enabled": true,
+    "prefix": "eab_",
+    "handler": "typed",
+    "chipParam": "chip_gen",
+    "pathParam": "EAB_TOOL_PATH",
+    "mandatoryConfirmation": true,
+    "descriptionNote": "Execution always requires confirmation: this tool returns a preview + requestId, then run execute_eab_tool_call with confirm=true after the user approves. Use update_eab_tool_call to adjust the options first if needed."
+  },
+  "tools": [
+    {
+      "name": "list_eab_catalog",
+      "handler": "list_catalog",
+      "description": "List all commands loaded from the catalog, including their target chip and options.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "prepare_eab_tool_call",
+      "handler": "prepare",
+      "description": "Validate the tool path, load a command preview, and create a confirmation request.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "EAB_TOOL_PATH": {
+            "type": "string",
+            "description": "Absolute path to the CLI executable (e.g. eab_tools.exe)."
+          },
+          "commandName": {
+            "type": "string",
+            "description": "Command name from the catalog. Chip-prefixed names like \"82x img_cvt\" are accepted."
+          },
+          "targetChip": {
+            "type": "string",
+            "description": "Optional target chip filter, such as BT82X or Pre-BT82X."
+          },
+          "cliArgs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Raw CLI arguments to pass after the command name."
+          }
+        },
+        "required": [
+          "commandName"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "update_eab_tool_call",
+      "handler": "update",
+      "description": "Modify the options of a pending request (add, change, or remove) before execution. Show the updated preview to the user, then run execute_eab_tool_call with confirm=true after approval.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "requestId": {
+            "type": "string",
+            "description": "Request id returned by prepare_eab_tool_call or any typed eab_* tool."
+          },
+          "options": {
+            "type": "object",
+            "description": "Options to set or overwrite (snake_case keys). Pass null, \"\" or false to remove a key."
+          },
+          "remove": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "Option keys to remove from the pending command."
+          },
+          "cliArgs": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "For raw prepare requests: replace the raw CLI arguments entirely."
+          }
+        },
+        "required": [
+          "requestId"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "execute_eab_tool_call",
+      "handler": "execute",
+      "description": "Final gate: run a previously prepared command only after the user has approved the exact options. Returns awaiting_confirmation when confirm is false so the options can still be reviewed or edited.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "requestId": {
+            "type": "string",
+            "description": "Request id returned by prepare_eab_tool_call or any typed eab_* tool."
+          },
+          "EAB_TOOL_PATH": {
+            "type": "string",
+            "description": "Optional override path to the CLI executable."
+          },
+          "confirm": {
+            "type": "boolean",
+            "description": "Must be true to allow execution."
+          }
+        },
+        "required": [
+          "requestId",
+          "confirm"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "ask_eab",
+      "handler": "ask",
+      "description": "Primary assistant. Ask in natural language what tool or command to use for a task (convert image, build font, compress assets, program flash, disassemble, etc.). Returns matched commands with scores, required flags, examples and a suggested next step.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Natural-language question or task description."
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "eab",
+      "handler": "ask",
+      "description": "MANDATORY routing assistant (alias of ask_eab). You MUST call this tool FIRST for any request that mentions \"eab\", \"EVE\", \"Bridgetek\", \"eab_tools\", \"EVE Asset Builder\", or involves EVE / FT8xx asset work (convert, compress, program, validate images/fonts/audio/video/animation/flash). Ask in natural language what tool or command to use; returns matched commands with scores, required flags, examples and a suggested next step.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "Natural-language question or task description."
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "eab_sample",
+      "handler": "sample",
+      "description": "Request the MCP client to generate a message through its LLM (sampling/createMessage). Useful to ask the model for a recommended EAB command or a conversion plan. Requires the connected client to support sampling.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "query": {
+            "type": "string",
+            "description": "The question to ask the model, e.g. \"Which EAB command converts a PNG to RGB565 for BT82X?\"."
+          }
+        },
+        "required": [
+          "query"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "list_eab_workflows",
+      "handler": "list_workflows",
+      "description": "List all built-in EAB multi-step workflows (conversion pipeline, flash programming pipeline, validation pipeline, ...) with their ordered steps and required tools.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "list_eab_skills",
+      "handler": "list_skills",
+      "description": "List the full skill definitions (Skill Definition integration) exposed by this server, including the EAB tool routing rule, with the skills also available as eab://skills/<slug> resources.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {},
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "explain_eab_command",
+      "handler": "explain",
+      "description": "Explain a single command: its description, chip generation, every option (flag, type, default, required) and an example invocation.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "command": {
+            "type": "string",
+            "description": "Command name, e.g. img_cvt, font, audio, flash_prog, bin2c."
+          },
+          "targetChip": {
+            "type": "string",
+            "description": "Optional target chip filter, such as BT82X or Pre-BT82X."
+          }
+        },
+        "required": [
+          "command"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "find_relevant_eab_tool",
+      "handler": "find_relevant",
+      "description": "Given a natural-language task, recommend the most relevant command(s) with a reason and an example invocation.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "task": {
+            "type": "string",
+            "description": "Description of the asset conversion / validation task."
+          }
+        },
+        "required": [
+          "task"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "suggest_eab_command",
+      "handler": "suggest",
+      "description": "Convert a natural-language request into a concrete command suggestion with the recommended MCP tool and the exact invocation to run.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "request": {
+            "type": "string",
+            "description": "Natural-language task, e.g. \"Convert this PNG to RGB565\"."
+          },
+          "targetChip": {
+            "type": "string",
+            "description": "Optional chip preference: BT82X or Pre-BT82X."
+          }
+        },
+        "required": [
+          "request"
+        ],
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "check_eab_installation",
+      "handler": "check_installation",
+      "description": "Check whether EAB (eab_tools.exe) is installed on this PC, which version is present, and whether a newer build is available in the Bridgetek/EAB-CLI repository. Call this first when eab_tools.exe cannot be found or the user asks about installing/updating EAB.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "installDir": {
+            "type": "string",
+            "description": "Optional install directory to inspect. Defaults to %LOCALAPPDATA%\\EAB-CLI (override with EAB_CLI_INSTALL_DIR)."
+          },
+          "ref": {
+            "type": "string",
+            "description": "Branch, tag or commit of Bridgetek/EAB-CLI to compare against. Defaults to main."
+          },
+          "token": {
+            "type": "string",
+            "description": "Optional GitHub token for the private Bridgetek/EAB-CLI repository. Defaults to EAB_GITHUB_TOKEN / GITHUB_TOKEN / GH_TOKEN, then `gh auth token`."
+          },
+          "checkRemote": {
+            "type": "boolean",
+            "description": "Set false to skip the GitHub lookup and only report the local installation."
+          }
+        },
+        "additionalProperties": false
+      }
+    },
+    {
+      "name": "install_eab_cli",
+      "handler": "install",
+      "description": "Download and install (or update) EAB from the Bridgetek/EAB-CLI repository (https://github.com/Bridgetek/EAB-CLI) when eab_tools.exe is missing or outdated. Without confirm=true it only returns the install plan; call it again with confirm=true after the user approves.",
+      "inputSchema": {
+        "type": "object",
+        "properties": {
+          "confirm": {
+            "type": "boolean",
+            "description": "Must be true to actually download and install. Omit to get the plan only."
+          },
+          "force": {
+            "type": "boolean",
+            "description": "Reinstall even when the installed build already matches the latest commit."
+          },
+          "installDir": {
+            "type": "string",
+            "description": "Target install directory. Defaults to %LOCALAPPDATA%\\EAB-CLI (override with EAB_CLI_INSTALL_DIR)."
+          },
+          "ref": {
+            "type": "string",
+            "description": "Branch, tag or commit of Bridgetek/EAB-CLI to install. Defaults to main."
+          },
+          "token": {
+            "type": "string",
+            "description": "Optional GitHub token for the private Bridgetek/EAB-CLI repository. Defaults to EAB_GITHUB_TOKEN / GITHUB_TOKEN / GH_TOKEN, then `gh auth token`."
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  ]
+}

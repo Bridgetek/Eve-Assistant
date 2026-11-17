@@ -1,0 +1,20 @@
+{
+  "name": "bridgetek-eve-assistant-build",
+  "version": "1.0.0",
+  "description": "Pinned build dependencies for the Bridgetek EVE Assistant desktop candidate",
+  "main": "index.js",
+  "scripts": {},
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@bridgetek/eab-mcp-server": "0.0.14",
+    "@bridgetek/eveapps-bt82x-mcp-server": "1.2.0",
+    "@bridgetek/eveapps-pre82x-mcp-server": "1.1.0"
+  },
+  "devDependencies": {
+    "esbuild": "0.25.12"
+  },
+  "private": true
+}

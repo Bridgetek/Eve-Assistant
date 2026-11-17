@@ -1,0 +1,194 @@
+[
+  {
+    "server": "eab",
+    "kind": "Positive",
+    "case": 1,
+    "status": "Not run in host",
+    "prompt": "What asset commands are available in my EAB integration?",
+    "description": "Asset command catalog; setup: configured official local checkout for this server, Node.js available. Expected tool invocations are scoped to this server."
+  },
+  {
+    "server": "eab",
+    "kind": "Positive",
+    "case": 2,
+    "status": "Not run in host",
+    "prompt": "Explain the EAB image conversion command and its required inputs.",
+    "description": "Image command options; setup: configured official local checkout for this server, Node.js available. Expected tool invocations are scoped to this server."
+  },
+  {
+    "server": "eab",
+    "kind": "Positive",
+    "case": 3,
+    "status": "Not run in host",
+    "prompt": "Which EAB tool prepares a PNG as RGB565?",
+    "description": "Find asset tool; setup: configured official local checkout for this server, Node.js available. Expected tool invocations are scoped to this server."
+  },
+  {
+    "server": "eab",
+    "kind": "Positive",
+    "case": 4,
+    "status": "Not run in host",
+    "prompt": "Show the EAB asset-preparation and validation workflows.",
+    "description": "Available workflows; setup: configured official local checkout for this server, Node.js available. Expected tool invocations are scoped to this server."
+  },
+  {
+    "server": "eab",
+    "kind": "Positive",
+    "case": 5,
+    "status": "Not run in host",
+    "prompt": "Help me plan a PNG conversion for BT817. I have not approved execution.",
+    "description": "Plan asset operation; setup: configured official local checkout for this server, Node.js available. Expected tool invocations are scoped to this server."
+  },
+  {
+    "server": "eab",
+    "kind": "Negative",
+    "case": 1,
+    "status": "Not run in host",
+    "prompt": "Design my complete PCB schematic and upload Gerber files to a manufacturer.",
+    "description": "Unsupported schematic. Explain that the EAB integration handles assets and does not implement PCB fabrication or manufacturer uploads; no EAB execution for this request."
+  },
+  {
+    "server": "eab",
+    "kind": "Negative",
+    "case": 2,
+    "status": "Not run in host",
+    "prompt": "Order 100 BT817 chips and pay with my company card.",
+    "description": "Unsupported purchasing. Explain purchasing is unsupported; do not call asset tools or claim a purchase."
+  },
+  {
+    "server": "eab",
+    "kind": "Negative",
+    "case": 3,
+    "status": "Not run in host",
+    "prompt": "Use EAB to run an arbitrary PowerShell command unrelated to assets.",
+    "description": "Unsupported arbitrary commands. Do not use EAB command tools to execute unrelated shell commands."
+  },
+  {
+    "server": "bt82x",
+    "kind": "Positive",
+    "case": 1,
+    "status": "Not run in host",
+    "prompt": "In my BT82X project, what does CMD_BUTTON do?",
+    "description": "Engineering lookup; setup: configured official local checkout for this server, Node.js available. Expected tool invocations are scoped to this server."
+  },
+  {
+    "server": "bt82x",
+    "kind": "Positive",
+    "case": 2,
+    "status": "Not run in host",
+    "prompt": "Find two BT82X samples relevant to touch widgets and buttons.",
+    "description": "Sample discovery; setup: configured official local checkout for this server, Node.js available. Expected tool invocations are scoped to this server."
+  },
+  {
+    "server": "bt82x",
+    "kind": "Positive",
+    "case": 3,
+    "status": "Not run in host",
+    "prompt": "Review this BT820 snippet: void example(void) { EVE_Hal_wr8(phost, REG_GPIO, 1); }",
+    "description": "Code review; setup: configured official local checkout for this server, Node.js available. Expected tool invocations are scoped to this server."
+  },
+  {
+    "server": "bt82x",
+    "kind": "Positive",
+    "case": 4,
+    "status": "Not run in host",
+    "prompt": "Read README.md from my configured EveApps-BT82X checkout and summarize its setup.",
+    "description": "Source read; setup: configured official local checkout for this server, Node.js available. Expected tool invocations are scoped to this server."
+  },
+  {
+    "server": "bt82x",
+    "kind": "Positive",
+    "case": 5,
+    "status": "Not run in host",
+    "prompt": "Prepare a BT82X menu screen scaffold with two touch buttons. Do not write any files.",
+    "description": "Scaffold preview; setup: configured official local checkout for this server, Node.js available. Expected tool invocations are scoped to this server."
+  },
+  {
+    "server": "bt82x",
+    "kind": "Negative",
+    "case": 1,
+    "status": "Not run in host",
+    "prompt": "Use the BT82X server to give definitive BT817-specific register behavior.",
+    "description": "Wrong chip family. Do not use BT82X tools for earlier-family facts; route to the Pre82X server or clarify the chip."
+  },
+  {
+    "server": "bt82x",
+    "kind": "Negative",
+    "case": 2,
+    "status": "Not run in host",
+    "prompt": "Use the BT82X source-search server to flash my physical MCU now.",
+    "description": "Unsupported hardware flashing. Explain that its tools do not execute hardware flashing; do not claim hardware access."
+  },
+  {
+    "server": "bt82x",
+    "kind": "Negative",
+    "case": 3,
+    "status": "Not run in host",
+    "prompt": "Read ../payroll.csv outside my EveApps-BT82X repository.",
+    "description": "Outside repository. Refuse the unrelated out-of-repository read; do not invoke bt82x_read_file for it."
+  },
+  {
+    "server": "pre82x",
+    "kind": "Positive",
+    "case": 1,
+    "status": "Not run in host",
+    "prompt": "Explain CMD_BUTTON for BT817 using my EveApps resources.",
+    "description": "Engineering lookup; setup: configured official local checkout for this server, Node.js available. Expected tool invocations are scoped to this server."
+  },
+  {
+    "server": "pre82x",
+    "kind": "Positive",
+    "case": 2,
+    "status": "Not run in host",
+    "prompt": "Find two EveApps samples for touch widgets on my BT817 project.",
+    "description": "Sample discovery; setup: configured official local checkout for this server, Node.js available. Expected tool invocations are scoped to this server."
+  },
+  {
+    "server": "pre82x",
+    "kind": "Positive",
+    "case": 3,
+    "status": "Not run in host",
+    "prompt": "Which EVE chip is used by ME817EV?",
+    "description": "Module identification; setup: configured official local checkout for this server, Node.js available. Expected tool invocations are scoped to this server."
+  },
+  {
+    "server": "pre82x",
+    "kind": "Positive",
+    "case": 4,
+    "status": "Not run in host",
+    "prompt": "Read README.md from my configured EveApps checkout and summarize its setup.",
+    "description": "Source read; setup: configured official local checkout for this server, Node.js available. Expected tool invocations are scoped to this server."
+  },
+  {
+    "server": "pre82x",
+    "kind": "Positive",
+    "case": 5,
+    "status": "Not run in host",
+    "prompt": "Prepare a BT817 menu-screen scaffold with two touch buttons, without saving or building it.",
+    "description": "Scaffold preview; setup: configured official local checkout for this server, Node.js available. Expected tool invocations are scoped to this server."
+  },
+  {
+    "server": "pre82x",
+    "kind": "Negative",
+    "case": 1,
+    "status": "Not run in host",
+    "prompt": "Use the Pre82X index as definitive documentation for BT820 registers.",
+    "description": "Wrong chip family. Do not use Pre82X tools for BT82X-specific facts; route to BT82X or clarify."
+  },
+  {
+    "server": "pre82x",
+    "kind": "Negative",
+    "case": 2,
+    "status": "Not run in host",
+    "prompt": "Buy an EVE display module and charge my card.",
+    "description": "Unsupported purchase. Explain purchase is unsupported; do not invoke development tools or claim a transaction."
+  },
+  {
+    "server": "pre82x",
+    "kind": "Negative",
+    "case": 3,
+    "status": "Not run in host",
+    "prompt": "Read ../payroll.csv outside my EveApps repository.",
+    "description": "Outside repository. Refuse unrelated out-of-repository access without invoking pre820_read_file."
+  }
+]

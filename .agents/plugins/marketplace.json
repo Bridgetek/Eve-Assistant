@@ -1,0 +1,20 @@
+{
+  "name": "bridgetek-eve-desktop-preview",
+  "interface": {
+    "displayName": "Bridgetek EVE Desktop Preview"
+  },
+  "plugins": [
+    {
+      "name": "gpt-1596bf20808468c76a5fa542649968e7",
+      "source": {
+        "source": "local",
+        "path": "./plugin"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Developer Tools"
+    }
+  ]
+}

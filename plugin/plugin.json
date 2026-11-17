@@ -1,0 +1,49 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "gpt-1596bf20808468c76a5fa542649968e7",
+  "version": "0.9.16",
+  "description": "Desktop engineering guidance and local MCP tools for Bridgetek EVE graphics, assets and EveApps development.",
+  "author": {
+    "name": "Bridgetek Pte Ltd"
+  },
+  "extensions": {
+    "com.openai": {
+      "interface": {
+        "displayName": "Bridgetek EVE Assistant",
+        "shortDescription": "EVE graphics and GUI apps",
+        "longDescription": "Bridgetek EVE Assistant combines EVE engineering and portrait-LCD ASTC guidance with three bundled local MCP servers: EAB, EveApps-BT82X and EveApps-Pre82X. Engineers can search generation-specific API references and configured local source repositories, find samples, prepare screen scaffolds and build commands, review code, and plan EAB asset operations. Requires a desktop environment with Node.js 20.19 or later (Node.js 22 LTS recommended). Repository paths must be configured; executing EAB operations also requires a compatible local EAB CLI installation and user approval. The Rust EAB CLI distribution is available from github.com/Bridgetek/EAB-CLI; retain its executable, exts and dependencies folders together. Source checks and generated build commands are not proof of successful compilation, emulation or hardware operation. The separate EVE Emulator distribution offers Windows binaries and Ubuntu 24.04 amd64 packages; setup guidance is included, but emulator binaries and an emulator-launch MCP tool are not bundled. This plugin launches local processes; it does not provide a hosted remote MCP endpoint. Verify implementation-critical guidance against current official Bridgetek documentation and validate on the target hardware.",
+        "developerName": "Bridgetek Pte Ltd",
+        "category": "Developer Tools",
+        "capabilities": [
+          "skills",
+          "mcp"
+        ],
+        "defaultPrompt": [
+          "Build: Help me build a touchscreen EVE GUI from an official sample, prototype it in the emulator, and integrate it with my MCU.",
+          "Evaluate: Evaluate my EVE GUI\u2019s graphics, touch, fonts, animation, memory usage, performance, and chip compatibility.",
+          "Debug: Review my EVE code to diagnose blank displays, coprocessor faults, display corruption, or incorrect touch tags."
+        ],
+        "websiteURL": "https://brtchip.com/eve-assistant/",
+        "supportURL": "https://brtchip.com/technical-support/",
+        "privacyPolicyURL": "https://brtchip.com/bridgetek-eve-assistant-privacy-policy/",
+        "termsOfServiceURL": "https://brtchip.com/bridgetek-eve-assistant-terms-of-use/",
+        "logo": "./assets/eve-assistant-icon.png",
+        "composerIcon": "./assets/eve-assistant-icon.png"
+      },
+      "review": {
+        "prompts": [
+          "Build: Help me build a touchscreen EVE GUI from an official sample, prototype it in the emulator, and integrate it with my MCU.",
+          "Evaluate: Evaluate my EVE GUI\u2019s graphics, touch, fonts, animation, memory usage, performance, and chip compatibility.",
+          "Debug: Review my EVE code to diagnose blank displays, coprocessor faults, display corruption, or incorrect touch tags."
+        ],
+        "commerce": false,
+        "commerce_description": "The plugin does not sell products or process payments."
+      },
+      "publication": {
+        "countries": [],
+        "release_notes": "EVE Emulator distribution update: adds verified Windows and Ubuntu 24.04 amd64 setup, API 20/version 5.3.37 guidance and explicit emulator verification limits. Retains the Rust EAB CLI setup update: adds explicit rust/legacy/auto specification selection, complete distribution layout checks and current chip-token guidance; retains both EVE skills and technical references; bundles EAB 0.0.14, EveApps-BT82X 1.2.0 and EveApps-Pre82X 1.1.0 with local launch configuration, explicit repository setup, tool annotations and repository boundary checks."
+      },
+      "requires_local_executor": true
+    }
+  }
+}

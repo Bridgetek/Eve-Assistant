@@ -1,0 +1,47 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "gpt-1596bf20808468c76a5fa542649968e7",
+  "version": "0.9.13",
+  "description": "Engineering guidance and GUI application creation for Bridgetek EVE graphics controllers (FT80x, FT81x/BT88x, BT81x, BT82x).",
+  "author": {
+    "name": "Bridgetek Pte Ltd"
+  },
+  "extensions": {
+    "com.openai": {
+      "interface": {
+        "displayName": "Bridgetek EVE Assistant",
+        "shortDescription": "EVE graphics and GUI apps",
+        "longDescription": "Bridgetek EVE Assistant helps embedded software and hardware engineers understand EVE graphics controllers, plan touchscreen GUI applications, review code and troubleshoot graphics, touch, memory and host communication. It provides generation-specific guidance, EAB/ESE/ESD toolchain selection, official EveApps examples, emulator-first workflows, bitmap transforms and portrait-panel ASTC asset guidance. This release packages two instruction skills and supporting reference documents. It does not install or connect MCP servers, run local development tools, or test physical hardware by itself. Builds, asset conversion, emulator execution and hardware testing require separately available tools and hardware. Verify implementation-critical guidance against current official Bridgetek documentation and validate on the target hardware.",
+        "developerName": "Bridgetek Pte Ltd",
+        "category": "Developer Tools",
+        "capabilities": [
+          "skills"
+        ],
+        "defaultPrompt": [
+          "Build: Help me build a touchscreen EVE GUI from an official sample, prototype it in the emulator, and integrate it with my MCU.",
+          "Evaluate: Evaluate my EVE GUI’s graphics, touch, fonts, animation, memory usage, performance, and chip compatibility.",
+          "Debug: Review my EVE code to diagnose blank displays, coprocessor faults, display corruption, or incorrect touch tags."
+        ],
+        "websiteURL": "https://brtchip.com/eve-assistant/",
+        "supportURL": "https://brtchip.com/technical-support/",
+        "privacyPolicyURL": "https://brtchip.com/bridgetek-eve-assistant-privacy-policy/",
+        "termsOfServiceURL": "https://brtchip.com/bridgetek-eve-assistant-terms-of-use/",
+        "logo": "./assets/eve-assistant-icon.png",
+        "composerIcon": "./assets/eve-assistant-icon.png"
+      },
+      "review": {
+        "prompts": [
+          "Build: Help me build a touchscreen EVE GUI from an official sample, prototype it in the emulator, and integrate it with my MCU.",
+          "Evaluate: Evaluate my EVE GUI’s graphics, touch, fonts, animation, memory usage, performance, and chip compatibility.",
+          "Debug: Review my EVE code to diagnose blank displays, coprocessor faults, display corruption, or incorrect touch tags."
+        ],
+        "commerce": false,
+        "commerce_description": "This skills-only plugin does not sell products or process payments."
+      },
+      "publication": {
+        "countries": [],
+        "release_notes": "Initial public submission. Includes both EVE engineering and portrait-LCD ASTC skills, bundled technical references, public introduction/privacy/terms links, EVE Assistant icon and clarified listing metadata."
+      }
+    }
+  }
+}

@@ -1,0 +1,620 @@
+[
+  {
+    "name": "safer-buffer",
+    "version": "2.1.2",
+    "license": "MIT",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "require-from-string",
+    "version": "2.0.2",
+    "license": "MIT",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "zod",
+    "version": "3.25.76",
+    "license": "MIT",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "cookie-signature",
+    "version": "1.2.2",
+    "license": "MIT",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "gopd",
+    "version": "1.2.0",
+    "license": "MIT",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "express-rate-limit",
+    "version": "8.7.4",
+    "license": "MIT",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "cookie",
+    "version": "0.7.2",
+    "license": "MIT",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "parseurl",
+    "version": "1.3.3",
+    "license": "MIT",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "path-key",
+    "version": "3.1.1",
+    "license": "MIT",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "ee-first",
+    "version": "1.1.1",
+    "license": "MIT",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "encodeurl",
+    "version": "2.0.3",
+    "license": "MIT",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "iconv-lite",
+    "version": "0.7.3",
+    "license": "MIT",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "bytes",
+    "version": "3.1.2",
+    "license": "MIT",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "es-define-property",
+    "version": "1.0.1",
+    "license": "MIT",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "dunder-proto",
+    "version": "1.0.1",
+    "license": "MIT",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "ms",
+    "version": "2.1.3",
+    "license": "MIT",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "hasown",
+    "version": "2.0.4",
+    "license": "MIT",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "http-errors",
+    "version": "2.0.1",
+    "license": "MIT",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "eventsource-parser",
+    "version": "3.1.1",
+    "license": "MIT",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "side-channel-map",
+    "version": "1.0.1",
+    "license": "MIT",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "side-channel-list",
+    "version": "1.0.1",
+    "license": "MIT",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "negotiator",
+    "version": "1.1.0",
+    "license": "MIT",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "call-bind-apply-helpers",
+    "version": "1.0.2",
+    "license": "MIT",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "call-bound",
+    "version": "1.0.4",
+    "license": "MIT",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "mime-types",
+    "version": "3.0.2",
+    "license": "MIT",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "hono",
+    "version": "4.13.18",
+    "license": "MIT",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "es-object-atoms",
+    "version": "1.1.2",
+    "license": "MIT",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "shebang-command",
+    "version": "2.0.0",
+    "license": "MIT",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "router",
+    "version": "2.2.0",
+    "license": "MIT",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "on-finished",
+    "version": "2.4.2",
+    "license": "MIT",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "serve-static",
+    "version": "2.2.1",
+    "license": "MIT",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "content-disposition",
+    "version": "2.0.1",
+    "license": "MIT",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "body-parser",
+    "version": "2.4.0",
+    "license": "MIT",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "es-errors",
+    "version": "1.3.0",
+    "license": "MIT",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "side-channel-weakmap",
+    "version": "1.0.2",
+    "license": "MIT",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "shebang-regex",
+    "version": "3.0.0",
+    "license": "MIT",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "merge-descriptors",
+    "version": "2.0.0",
+    "license": "MIT",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "json-schema-traverse",
+    "version": "1.0.0",
+    "license": "MIT",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "fresh",
+    "version": "2.0.0",
+    "license": "MIT",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "express",
+    "version": "5.3.0",
+    "license": "MIT",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "escape-html",
+    "version": "1.0.3",
+    "license": "MIT",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "ipaddr.js",
+    "version": "1.9.1",
+    "license": "MIT",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "vary",
+    "version": "1.1.2",
+    "license": "MIT",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "json-schema-typed",
+    "version": "8.0.2",
+    "license": "BSD-2-Clause",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "mime-db",
+    "version": "1.54.0",
+    "license": "MIT",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "cors",
+    "version": "2.8.6",
+    "license": "MIT",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "toidentifier",
+    "version": "1.0.1",
+    "license": "MIT",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "statuses",
+    "version": "2.0.2",
+    "license": "MIT",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "object-assign",
+    "version": "4.1.1",
+    "license": "MIT",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "cross-spawn",
+    "version": "7.0.6",
+    "license": "MIT",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "media-typer",
+    "version": "1.1.1",
+    "license": "MIT",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "pkce-challenge",
+    "version": "5.0.1",
+    "license": "MIT",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "accepts",
+    "version": "2.0.0",
+    "license": "MIT",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "jose",
+    "version": "6.2.17",
+    "license": "MIT",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "fast-deep-equal",
+    "version": "3.1.3",
+    "license": "MIT",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "has-symbols",
+    "version": "1.1.0",
+    "license": "MIT",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "is-promise",
+    "version": "4.0.0",
+    "license": "MIT",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "once",
+    "version": "1.4.0",
+    "license": "ISC",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "ajv",
+    "version": "8.20.0",
+    "license": "MIT",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "get-proto",
+    "version": "1.0.1",
+    "license": "MIT",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "inherits",
+    "version": "2.0.4",
+    "license": "ISC",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "ip-address",
+    "version": "10.7.6",
+    "license": "MIT",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "fast-uri",
+    "version": "3.1.9",
+    "license": "BSD-3-Clause",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "etag",
+    "version": "1.8.1",
+    "license": "MIT",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "zod-to-json-schema",
+    "version": "3.25.2",
+    "license": "ISC",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "function-bind",
+    "version": "1.1.2",
+    "license": "MIT",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "raw-body",
+    "version": "3.0.2",
+    "license": "MIT",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "eventsource",
+    "version": "3.0.7",
+    "license": "MIT",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "debug",
+    "version": "4.4.3",
+    "license": "MIT",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "object-inspect",
+    "version": "1.13.4",
+    "license": "MIT",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "proxy-addr",
+    "version": "2.0.8",
+    "license": "MIT",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "type-is",
+    "version": "2.1.0",
+    "license": "MIT",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "path-to-regexp",
+    "version": "8.4.2",
+    "license": "MIT",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "send",
+    "version": "1.2.1",
+    "license": "MIT",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "forwarded",
+    "version": "0.2.0",
+    "license": "MIT",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "get-intrinsic",
+    "version": "1.3.0",
+    "license": "MIT",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "esbuild",
+    "version": "0.25.12",
+    "license": "MIT",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "side-channel",
+    "version": "1.1.1",
+    "license": "MIT",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "finalhandler",
+    "version": "2.1.1",
+    "license": "MIT",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "which",
+    "version": "2.0.2",
+    "license": "ISC",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "isexe",
+    "version": "2.0.0",
+    "license": "ISC",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "qs",
+    "version": "6.17.1",
+    "license": "BSD-3-Clause",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "math-intrinsics",
+    "version": "1.1.0",
+    "license": "MIT",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "range-parser",
+    "version": "1.3.0",
+    "license": "MIT",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "depd",
+    "version": "2.0.0",
+    "license": "MIT",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "content-type",
+    "version": "1.0.5",
+    "license": "MIT",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "wrappy",
+    "version": "1.0.2",
+    "license": "ISC",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "setprototypeof",
+    "version": "1.2.0",
+    "license": "ISC",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "unpipe",
+    "version": "1.0.0",
+    "license": "MIT",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "ajv-formats",
+    "version": "3.0.1",
+    "license": "MIT",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "content-type",
+    "version": "2.1.0",
+    "license": "MIT",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "content-type",
+    "version": "2.1.0",
+    "license": "MIT",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "content-type",
+    "version": "2.1.0",
+    "license": "MIT",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "@modelcontextprotocol/sdk",
+    "version": "1.32.2",
+    "license": "MIT",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "@bridgetek/eab-mcp-server",
+    "version": "0.0.14",
+    "license": "MIT",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "@bridgetek/eveapps-pre82x-core",
+    "version": "1.1.0",
+    "license": "See upstream",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "@bridgetek/eveapps-bt82x-mcp-server",
+    "version": "1.2.0",
+    "license": "MIT",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "@bridgetek/eveapps-bt82x-core",
+    "version": "1.2.0",
+    "license": "MIT",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "@bridgetek/eveapps-pre82x-mcp-server",
+    "version": "1.1.0",
+    "license": "See upstream",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "@esbuild/linux-x64",
+    "version": "0.25.12",
+    "license": "MIT",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "benchmark",
+    "version": "1.0.0",
+    "license": "ISC",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "@hono/node-server",
+    "version": "2.1.8",
+    "license": "MIT",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  },
+  {
+    "name": "content-type",
+    "version": "2.1.0",
+    "license": "MIT",
+    "note": "Build/runtime dependency inventory; not every build dependency is shipped."
+  }
+]

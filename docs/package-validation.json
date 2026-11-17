@@ -1,0 +1,22 @@
+{
+  "version": "0.9.16",
+  "change_scope": "Emulator setup guidance, skill/workflow references, listing and release metadata; reproducible build paths",
+  "archive_integrity": "Passed",
+  "guide_reference_checks": "Passed",
+  "metadata_length_checks": "Passed",
+  "runtime_files_byte_identical_to_0_9_15": 22,
+  "prior_runtime_checks": {
+    "version": "0.9.15",
+    "passed": 31,
+    "failed": 0,
+    "rerun_for_this_documentation_update": false
+  },
+  "skills": 2,
+  "mcp_servers": 3,
+  "external_emulator_release_inspected": "5.3.37",
+  "external_emulator_api_inspected": 20,
+  "windows_emulator_execution": "Not run",
+  "ubuntu_package_install_or_emulator_execution": "Not run",
+  "emulator_binaries_included": false,
+  "public_publication": "Not submitted or published"
+}

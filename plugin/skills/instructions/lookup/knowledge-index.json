@@ -1,0 +1,69 @@
+{
+  "files": [
+    {
+      "name": "Bridgetek EVE Linebuffer Architecture.docx",
+      "path": "references/Bridgetek EVE Linebuffer Architecture.docx"
+    },
+    {
+      "name": "Bridgetek EVE Underrun Explained.docx",
+      "path": "references/Bridgetek EVE Underrun Explained.docx"
+    },
+    {
+      "name": "Display List Double Buffering.docx",
+      "path": "references/Display List Double Buffering.docx"
+    },
+    {
+      "name": "Hidden Double Buffering of RAM_COMPOSITE.docx",
+      "path": "references/Hidden Double Buffering of RAM_COMPOSITE.docx"
+    },
+    {
+      "name": "Bridgetek_EVE_MCP_Emulator_First_Workflow_Prompt_Guide_20261026.docx",
+      "path": "references/Bridgetek_EVE_MCP_Emulator_First_Workflow_Prompt_Guide_20261026.docx"
+    },
+    {
+      "name": "Emulator first EVE GUI development",
+      "path": "references/emulator-first-workflow.md"
+    },
+    {
+      "name": "Complete emulator first P01-P16 prompt guide",
+      "path": "references/emulator-first-prompt-guide.md"
+    },
+    {
+      "name": "BT82X_RENDER_DISPLAY_LIST_STRATEGY (1).pdf",
+      "path": "references/BT82X_RENDER_DISPLAY_LIST_STRATEGY (1).pdf"
+    },
+    {
+      "name": "BT82X render and display-list strategy guidance",
+      "path": "references/bt82x-render-display-list-strategy.md"
+    },
+    {
+      "name": "BT82X render strategy page-by-page source text",
+      "path": "references/bt82x-render-display-list-strategy-source.md"
+    },
+    {
+      "name": "Bridgetek_EVE_Toolchain_Introduction.docx",
+      "path": "references/Bridgetek_EVE_Toolchain_Introduction.docx"
+    },
+    {
+      "name": "EVE toolchain guidance",
+      "path": "references/eve-toolchain-guidance.md"
+    },
+    {
+      "name": "EVE toolchain introduction complete source text",
+      "path": "references/eve-toolchain-introduction-source.md"
+    },
+    {
+      "name": "Bridgetek MCP server guidance",
+      "path": "references/mcp-server-guidance.md"
+    },
+    {
+      "name": "BT815_Bitmap_Transform_C_OpenGL_EN_ZH_Programmer_Guide.docx",
+      "path": "references/BT815_Bitmap_Transform_C_OpenGL_EN_ZH_Programmer_Guide.docx"
+    },
+    {
+      "name": "Bitmap transform matrix and programmer guidance",
+      "path": "references/bitmap-transform-guidance.md"
+    }
+  ],
+  "guidelines": "Resolve each files[].path relative to the directory containing this skill's SKILL.md (the skill root), not this index's lookup/ directory or the current working directory. Use that directory for filesystem reads or append the path unchanged to the skill's root resource URI. This index is not a complete inventory of the plugin's files. If a needed file is absent from this index or cannot be found or read at its indexed path, continue normal file discovery using the skill's available file listing or installed files; do not stop or conclude that the file is unavailable based on this index alone. This index is primarily a GPT migration helper that maps original GPT upload names to packaged filenames in the plugin."
+}
