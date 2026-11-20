@@ -96,27 +96,20 @@ At the wizard prompts, enter the path itself **without surrounding quotation mar
 
 The wizard only saves local paths and edition settings. It does not clone repositories, install EAB or register the plugin in your host.
 
-### 4. Register the local plugin marketplace
+### 4. Register the plugin marketplace
 
-From the **repository root**, which contains `.agents/plugins/marketplace.json`:
+Register the GitHub marketplace from any PowerShell directory:
 
 ```powershell
-Set-Location C:\Bridgetek\Eve-Assistant
-codex plugin marketplace add .
+codex plugin marketplace add Bridgetek/EVE-Assistant
 codex plugin marketplace list
 ```
 
+This registration works without a manual Eve-Assistant checkout. Step 3 uses a checkout for the interactive wizard, or you can create the [per-user configuration](#where-configuration-is-saved) directly.
+
 Restart the supported ChatGPT desktop app, open its Plugins Directory, select **Bridgetek EVE Desktop Preview**, and install/enable **Bridgetek EVE Assistant**. Use it in a thread that runs locally on this PC. The exact UI and availability depend on your client and organization settings.
 
-The marketplace ID is `bridgetek-eve-desktop-preview`; its plugin directory is `./plugin`. Do not register `plugin/` itself as the marketplace root, and do not edit files in the host's generated plugin cache.
-
-If you prefer a Git-backed marketplace, you can register the public repository instead of the local checkout:
-
-```powershell
-codex plugin marketplace add Bridgetek/Eve-Assistant
-```
-
-Choose one registration route. The per-user configuration created in step 3 works for the installed plugin copy too, provided the host runs as the same OS user in the same environment.
+To register an existing local checkout instead, run `codex plugin marketplace add .` from the repository root containing `.agents/plugins/marketplace.json`. Choose one registration route. The marketplace ID is `bridgetek-eve-desktop-preview`, and both routes use the per-user configuration from step 3 under the same OS user and environment.
 
 ### 5. Verify and start using it
 
